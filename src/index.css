@@ -83,8 +83,6 @@ h2 { margin:0; font-size:20px; letter-spacing:-.03em; }
   position:relative; transition:background .1s linear;
 }
 .pomodoro::before { content:""; position:absolute; inset:10px; border-radius:50%; background:#fff; }
-.pomodoro.running { animation:pulse 2s ease-in-out infinite; }
-@keyframes pulse { 0%,100% { transform:scale(1); } 50% { transform:scale(1.018); } }
 .pomodoro-inner { position:relative; z-index:1; display:flex; flex-direction:column; align-items:center; gap:6px; }
 .pomodoro-inner span { font-size:12px; color:#9097a7; font-weight:700; }
 .pomodoro-inner strong { font-size:62px; font-variant-numeric:tabular-nums; letter-spacing:-.06em; }
@@ -140,7 +138,7 @@ h2 { margin:0; font-size:20px; letter-spacing:-.03em; }
 }
 
 /* v1.1 dark + goals + circular timer */
-body{background:#080a0f}.app-shell{background:radial-gradient(circle at 50% -10%,#171b29 0,#080a0f 42%);color:#eceef5}.topbar{background:rgba(10,12,18,.88);border-color:#202431}.calendar-card,.records-card,.goal-card,.chart-card,.timer-note,.session-info{background:#11141b;border-color:#242936}.day{background:#11141b;border-color:#20242f;color:#d7dbea}.day.empty{background:#0e1016}.day:hover{background:#171b25}.day.selected{background:#171d31}.month-nav button{background:#11141c;color:#dce1ed;border-color:#292e3b}.goal-card{padding:22px;margin-bottom:18px}.card-heading{display:flex;justify-content:space-between;align-items:center;gap:14px}.muted{font-size:11px;color:#727b8e}.goal-add{display:grid;grid-template-columns:1fr 100px 24px auto;align-items:center;gap:8px;margin:18px 0}.goal-add input,.goal-row input{border:1px solid #2a3040;outline:0;background:#0b0e14;color:#e9ecf5;border-radius:10px;padding:10px 11px}.minutes-input{text-align:center}.unit{font-size:12px;color:#7e879a}.goal-row{padding:17px 0;border-top:1px solid #242936}.goal-top{display:flex;justify-content:space-between;align-items:center;gap:12px}.goal-top>input{flex:1;background:transparent;font-weight:800}.goal-target{display:flex;align-items:center;gap:6px;color:#7e879b;font-size:11px}.goal-target input{width:70px;text-align:center;padding:7px}.progress-track{height:8px;background:#252b38;border-radius:99px;overflow:hidden;margin:13px 0 8px}.progress-fill{height:100%;border-radius:99px;background:linear-gradient(90deg,#647cf0,#9b86f6);transition:width .25s}.goal-bottom{display:flex;align-items:center;gap:12px;color:#858ea1;font-size:11px}.goal-bottom strong{color:#bfc7ff;margin-left:auto}.goal-badge{display:block;margin-top:7px;font-size:9px;color:#aeb8ff;font-weight:800}.primary{background:#657bf0}.secondary{background:#242a37;color:#d0d5e2}.pomodoro-wrap{position:relative;width:340px;height:340px;margin:0 auto 28px;display:grid;place-items:center}.pomodoro{background:conic-gradient(#7186f0 var(--progress),#252a37 var(--progress));box-shadow:0 0 60px rgba(92,112,231,.08)}.pomodoro::before{background:#0e1118;border-color:#252b38}.pomodoro.running{animation:pulse 2s ease-in-out infinite}@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.018)}}.orbit-dot{position:absolute;width:14px;height:14px;border-radius:50%;background:#9daaff;box-shadow:0 0 22px #7186f0;top:50%;left:50%;margin:-7px 0 0 -7px;animation:orbit 2s cubic-bezier(.65,.05,.36,1) infinite;animation-play-state:paused;will-change:transform}.pomodoro-wrap:has(.pomodoro.running) .orbit-dot{animation-play-state:running}@keyframes orbit{from{transform:rotate(0deg) translateY(-160px)}to{transform:rotate(360deg) translateY(-160px)}}.bottom-nav{background:rgba(15,18,25,.94);border-color:#2a3040;box-shadow:0 10px 32px rgba(0,0,0,.4)}.bottom-nav button.active{background:#202747;color:#aab6ff}@media(max-width:700px){.goal-add{grid-template-columns:1fr 75px 20px}.goal-add .primary{grid-column:1/-1}.goal-top{align-items:flex-start;flex-direction:column}.goal-target{align-self:flex-end}.pomodoro-wrap{width:290px;height:290px}.pomodoro{width:270px;height:270px}.orbit-dot{animation-name:orbitMobile}@keyframes orbitMobile{from{transform:rotate(0deg) translateY(-135px)}to{transform:rotate(360deg) translateY(-135px)}}}
+body{background:#080a0f}.app-shell{background:radial-gradient(circle at 50% -10%,#171b29 0,#080a0f 42%);color:#eceef5}.topbar{background:rgba(10,12,18,.88);border-color:#202431}.calendar-card,.records-card,.goal-card,.chart-card,.timer-note,.session-info{background:#11141b;border-color:#242936}.day{background:#11141b;border-color:#20242f;color:#d7dbea}.day.empty{background:#0e1016}.day:hover{background:#171b25}.day.selected{background:#171d31}.month-nav button{background:#11141c;color:#dce1ed;border-color:#292e3b}.goal-card{padding:22px;margin-bottom:18px}.card-heading{display:flex;justify-content:space-between;align-items:center;gap:14px}.muted{font-size:11px;color:#727b8e}.goal-add{display:grid;grid-template-columns:1fr 100px 24px auto;align-items:center;gap:8px;margin:18px 0}.goal-add input,.goal-row input{border:1px solid #2a3040;outline:0;background:#0b0e14;color:#e9ecf5;border-radius:10px;padding:10px 11px}.minutes-input{text-align:center}.unit{font-size:12px;color:#7e879a}.goal-row{padding:17px 0;border-top:1px solid #242936}.goal-top{display:flex;justify-content:space-between;align-items:center;gap:12px}.goal-top>input{flex:1;background:transparent;font-weight:800}.goal-target{display:flex;align-items:center;gap:6px;color:#7e879b;font-size:11px}.goal-target input{width:70px;text-align:center;padding:7px}.progress-track{height:8px;background:#252b38;border-radius:99px;overflow:hidden;margin:13px 0 8px}.progress-fill{height:100%;border-radius:99px;background:linear-gradient(90deg,#647cf0,#9b86f6);transition:width .25s}.goal-bottom{display:flex;align-items:center;gap:12px;color:#858ea1;font-size:11px}.goal-bottom strong{color:#bfc7ff;margin-left:auto}.goal-badge{display:block;margin-top:7px;font-size:9px;color:#aeb8ff;font-weight:800}.primary{background:#657bf0}.secondary{background:#242a37;color:#d0d5e2}.pomodoro-wrap{position:relative;width:340px;height:340px;margin:0 auto 28px;display:grid;place-items:center}.pomodoro{background:conic-gradient(#7186f0 var(--progress),#252a37 var(--progress));box-shadow:0 0 60px rgba(92,112,231,.08)}.pomodoro::before{background:#0e1118;border-color:#252b38}.pomodoro-wrap:has(.pomodoro.running) @keyframes orbit{from{transform:rotate(0deg) translateY(-153px)}to{transform:rotate(360deg) translateY(-153px)}}.bottom-nav{background:rgba(15,18,25,.94);border-color:#2a3040;box-shadow:0 10px 32px rgba(0,0,0,.4)}.bottom-nav button.active{background:#202747;color:#aab6ff}@media(max-width:700px){.goal-add{grid-template-columns:1fr 75px 20px}.goal-add .primary{grid-column:1/-1}.goal-top{align-items:flex-start;flex-direction:column}.goal-target{align-self:flex-end}.pomodoro-wrap{width:290px;height:290px}.pomodoro{width:270px;height:270px}@keyframes orbitMobile{from{transform:rotate(0deg) translateY(-128px)}to{transform:rotate(360deg) translateY(-128px)}}}
 
 /* v1.2 refinements */
 .name-input::placeholder,.goal-add input::placeholder{color:#626a7b;opacity:1}
@@ -225,13 +223,250 @@ button:not(:disabled):hover { transform:translateY(-1px); }
 .content > section { animation:sectionEnter .38s cubic-bezier(.22,1,.36,1) both; }
 @keyframes sectionEnter { from{opacity:0;transform:translateY(7px)} to{opacity:1;transform:translateY(0)} }
 .pomodoro { transition:background .35s ease, box-shadow .35s ease, transform .35s cubic-bezier(.22,1,.36,1); }
-.pomodoro.running { animation:pulse 2s ease-in-out infinite; }
+
 @media (prefers-reduced-motion: reduce) {
   *,*::before,*::after { animation-duration:.001ms !important; animation-iteration-count:1 !important; transition-duration:.001ms !important; scroll-behavior:auto !important; }
 }
 
 /* Music tab */
-.music-page{max-width:860px;margin:0 auto}.music-background-player{position:fixed!important;left:-9999px!important;top:0!important;width:2px!important;height:2px!important;overflow:hidden!important;opacity:0!important;pointer-events:none!important}.track-count{padding:8px 12px;border:1px solid #303747;border-radius:999px;color:#aeb8ff;font-weight:800;font-size:12px;background:#11141b}.music-player-card,.playlist-card{background:#11141b;border:1px solid #242936;border-radius:18px;overflow:hidden;box-shadow:0 16px 36px rgba(0,0,0,.16)}.music-player-card{margin-bottom:20px}.now-playing{padding:24px 24px 18px;background:linear-gradient(135deg,rgba(101,123,240,.2),rgba(155,134,246,.08))}.playing-label{display:block;color:#aeb8ff;font-size:10px;font-weight:900;letter-spacing:.14em;margin-bottom:8px}.now-playing h2{margin:0;color:#f1f3fb;font-size:25px}.now-playing p{margin:7px 0 0;color:#a9b1c2;font-size:14px}.youtube-frame{position:relative;padding-top:62.5%;background:#080a0f}.youtube-frame>div{position:absolute;inset:0;width:100%;height:100%}.youtube-player-host,.youtube-frame iframe{width:100%;height:100%;border:0}.stats-title{color:#000!important}.music-controls{display:flex;align-items:center;gap:11px;padding:14px 24px;background:#0d1017;border-top:1px solid #242936;color:#aeb8ff;font-size:12px;font-weight:800}.music-controls label{display:flex;align-items:center;gap:8px;flex:1}.music-controls input{accent-color:#7489f6;width:100%}.mute-button{width:36px;height:32px;border:1px solid #303747;border-radius:9px;background:#1b2130;color:#dbe1ff;cursor:pointer}.music-note{padding:13px 24px;margin:0;color:#858ea1;font-size:12px}.playlist-heading{display:flex;justify-content:space-between;align-items:center;padding:21px 22px 17px;border-bottom:1px solid #242936}.playlist-heading h2{margin:3px 0 0;font-size:18px}.playlist-heading>span{color:#8e9aff;font-size:12px;font-weight:800}.track-list{padding:7px}.track-row{width:100%;display:flex;align-items:center;gap:14px;border:0;border-radius:12px;background:transparent;color:#dce1ed;text-align:left;padding:12px 13px;cursor:pointer}.track-row:hover{background:#181d2a}.track-row.active{background:#202747}.track-number{width:25px;color:#77819a;font-size:12px;font-weight:800}.track-row.active .track-number{color:#aeb8ff}.track-details{display:flex;min-width:0;flex:1;flex-direction:column;gap:4px}.track-details strong{font-size:14px;color:#edf0f8}.track-details small{color:#8992a5;font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.track-play{color:#aeb8ff;font-size:11px;font-weight:800;min-width:38px;text-align:right}.track-row:not(.active) .track-play{font-size:12px;color:#737d92}.bottom-nav button{padding-left:13px;padding-right:13px}@media(max-width:700px){.music-page .page-heading{align-items:flex-start}.now-playing{padding:19px}.now-playing h2{font-size:21px}.music-controls{padding:12px 16px}.music-note{padding:12px 16px}.playlist-heading{padding:18px 16px}.track-row{padding:11px 9px;gap:10px}.bottom-nav{gap:3px}.bottom-nav button{font-size:10px;padding-left:5px;padding-right:5px}}
+.music-page{max-width:860px;margin:0 auto}.music-background-player{position:fixed!important;left:-9999px!important;top:0!important;width:2px!important;height:2px!important;overflow:hidden!important;opacity:0!important;pointer-events:none!important}.track-count{padding:8px 12px;border:1px solid #303747;border-radius:999px;color:#aeb8ff;font-weight:800;font-size:12px;background:#11141b}.music-player-card,.playlist-card{background:#11141b;border:1px solid #242936;border-radius:18px;overflow:hidden;box-shadow:0 16px 36px rgba(0,0,0,.16)}.music-player-card{margin-bottom:20px}.now-playing{padding:24px 24px 18px;background:linear-gradient(135deg,rgba(101,123,240,.2),rgba(155,134,246,.08))}.playing-label{display:block;color:#aeb8ff;font-size:10px;font-weight:900;letter-spacing:.14em;margin-bottom:8px}.now-playing h2{margin:0;color:#f1f3fb;font-size:25px}.now-playing p{margin:7px 0 0;color:#a9b1c2;font-size:14px}.youtube-frame{position:relative;padding-top:62.5%;background:#080a0f}.youtube-frame>div{position:absolute;inset:0;width:100%;height:100%}.youtube-player-host,.youtube-frame iframe{width:100%;height:100%;border:0}.stats-title{color:#fff!important}.music-controls{display:flex;align-items:center;gap:11px;padding:14px 24px;background:#0d1017;border-top:1px solid #242936;color:#aeb8ff;font-size:12px;font-weight:800}.music-controls label{display:flex;align-items:center;gap:8px;flex:1}.music-controls input{accent-color:#7489f6;width:100%}.mute-button{width:36px;height:32px;border:1px solid #303747;border-radius:9px;background:#1b2130;color:#dbe1ff;cursor:pointer}.music-note{padding:13px 24px;margin:0;color:#858ea1;font-size:12px}.playlist-heading{display:flex;justify-content:space-between;align-items:center;padding:21px 22px 17px;border-bottom:1px solid #242936}.playlist-heading h2{margin:3px 0 0;font-size:18px}.playlist-heading>span{color:#8e9aff;font-size:12px;font-weight:800}.track-list{padding:7px}.track-row{width:100%;display:flex;align-items:center;gap:14px;border:0;border-radius:12px;background:transparent;color:#dce1ed;text-align:left;padding:12px 13px;cursor:pointer}.track-row:hover{background:#181d2a}.track-row.active{background:#202747}.track-number{width:25px;color:#77819a;font-size:12px;font-weight:800}.track-row.active .track-number{color:#aeb8ff}.track-details{display:flex;min-width:0;flex:1;flex-direction:column;gap:4px}.track-details strong{font-size:14px;color:#edf0f8}.track-details small{color:#8992a5;font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.track-play{color:#aeb8ff;font-size:11px;font-weight:800;min-width:38px;text-align:right}.track-row:not(.active) .track-play{font-size:12px;color:#737d92}.bottom-nav button{padding-left:13px;padding-right:13px}@media(max-width:700px){.music-page .page-heading{align-items:flex-start}.now-playing{padding:19px}.now-playing h2{font-size:21px}.music-controls{padding:12px 16px}.music-note{padding:12px 16px}.playlist-heading{padding:18px 16px}.track-row{padding:11px 9px;gap:10px}.bottom-nav{gap:3px}.bottom-nav button{font-size:10px;padding-left:5px;padding-right:5px}}
 
 /* Supabase profile screen */
 .profile-shell{min-height:100vh;display:grid;place-items:center;padding:24px;background:radial-gradient(circle at 50% 0,#202846 0,#080a0f 52%);color:#edf0f8}.profile-card{width:min(100%,480px);padding:32px;border:1px solid #2b3242;border-radius:22px;background:rgba(17,20,27,.96);box-shadow:0 22px 60px rgba(0,0,0,.35)}.profile-card .brand{margin-bottom:28px}.profile-card h1{font-size:28px;margin:5px 0}.profile-help{color:#939caf;font-size:13px;margin:0 0 20px}.profile-list{display:flex;flex-wrap:wrap;gap:8px;min-height:37px;margin-bottom:16px}.profile-list>span{font-size:12px;color:#8a93a6}.profile-list button{border:1px solid #30394c;border-radius:999px;padding:8px 13px;background:#171c27;color:#cdd4e6;cursor:pointer}.profile-list button.selected{background:#394b9b;border-color:#7185ed;color:#fff}.profile-form{display:grid;gap:12px}.profile-form label{display:grid;gap:7px;font-size:12px;font-weight:800;color:#b9c1d4}.profile-form input{border:1px solid #30394c;border-radius:10px;background:#0b0e14;color:#edf0f8;padding:12px;font-size:15px;outline:0}.profile-form input:focus{border-color:#7489f6}.profile-message{min-height:20px;margin:14px 0 8px;color:#aeb8ff;font-size:12px}.profile-actions{display:flex;gap:9px}.profile-actions button{flex:1;padding:12px}.profile-footnote{margin:17px 0 0;color:#7f899d;font-size:11px;text-align:center}.topbar-actions{display:flex;align-items:center;gap:10px}.active-profile-name{font-size:12px;color:#bfc8ff;font-weight:800}.logout-button{border:1px solid #30394c;border-radius:8px;background:#171c27;color:#cdd4e6;padding:7px 9px;font-size:11px;cursor:pointer}@media(max-width:700px){.profile-card{padding:24px 19px}.topbar-actions{gap:6px}.active-profile-name{display:none}.logout-button{padding:6px}.live-clock{font-size:12px}}
+
+
+/* Requested fixes */
+.stats-title{color:#fff!important}
+.stat-cards>div{background:#11141b!important;border-color:#242936!important}
+.stat-cards span,.stat-cards strong{color:#fff!important}
+.music-content{max-width:1180px!important}
+.music-content .music-page{max-width:1120px!important;width:100%!important}
+.music-content .youtube-frame{width:100%!important;padding-top:56.25%!important}
+.pomodoro.running{animation:none!important}
+
+.pomodoro-wrap:has(.pomodoro.running) 
+@media(max-width:700px){.music-content{max-width:100%!important}.music-content .music-page{max-width:100%!important}.music-content .youtube-frame{padding-top:56.25%!important}}
+
+
+/* ===== LOZIX FINAL REQUESTED FIXES ===== */
+
+/* Statistics: prevent heading/card text collision caused by typography overrides. */
+.stats-title {
+  color:#fff !important;
+  line-height:1.2 !important;
+  display:block !important;
+  margin:0 !important;
+  white-space:nowrap !important;
+}
+.stat-cards {
+  align-items:stretch !important;
+}
+.stat-cards > div {
+  min-width:0 !important;
+  min-height:108px !important;
+  display:flex !important;
+  flex-direction:column !important;
+  justify-content:center !important;
+  gap:9px !important;
+  overflow:hidden !important;
+}
+.stat-cards span {
+  color:#b9bfcb !important;
+  line-height:1.35 !important;
+  margin:0 !important;
+}
+.stat-cards strong {
+  color:#fff !important;
+  line-height:1.2 !important;
+  display:block !important;
+  white-space:nowrap !important;
+}
+
+/* Pomodoro: remove breathing animation only. The timer itself stays untouched. */
+.pomodoro.running {
+  animation:none !important;
+  transform:none !important;
+}
+
+/* The dot follows the EXACT same progress angle as the conic-gradient ring.
+   Radius 155px = centerline of the 10px ring on the 320px circle. */
+
+
+/* Music: make the player/card substantially larger in the music tab. */
+.music-content {
+  max-width:1280px !important;
+}
+.music-content .music-page {
+  width:100% !important;
+  max-width:1200px !important;
+}
+.music-content .music-player-card {
+  width:100% !important;
+}
+.music-content .youtube-frame {
+  width:100% !important;
+  padding-top:70% !important;
+}
+
+@media (max-width:700px) {
+  .stats-title { white-space:normal !important; }
+  .stat-cards > div { min-height:96px !important; }
+  .music-content { max-width:100% !important; }
+  .music-content .music-page { max-width:100% !important; }
+  .music-content .youtube-frame { padding-top:70% !important; }
+  
+}
+
+
+/* =========================================================
+   LOZIX FINAL VISUAL FIX — DO NOT CHANGE APPLICATION LOGIC
+   ========================================================= */
+
+/* STATISTICS: the two chart-header texts must never overlap. */
+.chart-card > h2 {
+  display:block !important;
+  margin:0 0 12px !important;
+  padding:0 !important;
+  line-height:1.4 !important;
+  height:auto !important;
+  position:static !important;
+}
+.chart-card > .chart-help {
+  display:block !important;
+  margin:0 0 20px !important;
+  padding:0 !important;
+  line-height:1.6 !important;
+  height:auto !important;
+  position:static !important;
+  white-space:normal !important;
+}
+.stats-title {
+  color:#fff !important;
+  line-height:1.2 !important;
+  margin:0 !important;
+}
+.stat-cards > div {
+  background:#11141b !important;
+  border-color:#242936 !important;
+}
+.stat-cards span { color:#b9bfcb !important; line-height:1.4 !important; }
+.stat-cards strong { color:#fff !important; line-height:1.2 !important; }
+
+/* TIMER: the dot is NOT independently animated.
+   Its angle is the exact progress value already used by the Pomodoro ring.
+   Therefore its speed is exactly the timer's progress speed. */
+.pomodoro.running {
+  animation:none !important;
+  transform:none !important;
+}
+
+.pomodoro-wrap:has(.pomodoro.running) 
+@media (max-width:700px) {
+  
+}
+
+/* MUSIC: make the actual YouTube viewport substantially larger.
+   Use an explicit height so the YouTube iframe cannot collapse to its
+   API default height or leave a large unused black area. */
+.music-content .music-page {
+  width:100% !important;
+  max-width:1120px !important;
+}
+.music-content .music-player-card {
+  width:100% !important;
+}
+.music-content .youtube-frame {
+  width:100% !important;
+  height:min(60vw, 620px) !important;
+  min-height:420px !important;
+  max-height:620px !important;
+  padding-top:0 !important;
+  aspect-ratio:auto !important;
+  overflow:hidden !important;
+}
+.music-content .youtube-frame > div,
+.music-content .youtube-player-host,
+.music-content .youtube-frame iframe {
+  width:100% !important;
+  height:100% !important;
+  min-height:100% !important;
+  max-height:none !important;
+}
+@media (max-width:700px) {
+  .music-content .music-page { max-width:100% !important; }
+  .music-content .youtube-frame {
+    height:calc((100vw - 28px) * .5625) !important;
+    min-height:0 !important;
+    max-height:none !important;
+  }
+}
+
+
+/* Timer orbit: exactly 2 seconds per revolution.
+   Existing timer number, progress calculation and controls remain untouched. */
+
+.pomodoro-wrap:has(.pomodoro.running) 
+@keyframes lozixOrbit2s {
+  from { transform: rotate(0deg) translateY(-155px) !important; }
+  to   { transform: rotate(360deg) translateY(-155px) !important; }
+}
+
+@media (max-width:700px) {
+  @keyframes lozixOrbit2sMobile {
+    from { transform: rotate(0deg) translateY(-130px) !important; }
+    to   { transform: rotate(360deg) translateY(-130px) !important; }
+  }
+  
+}
+
+
+/* Final orbit alignment: move the 2-second dot slightly inward so its center follows the ring. */
+
+@keyframes lozixOrbit2s {
+  from { transform: rotate(0deg) translateY(-151px) !important; }
+  to { transform: rotate(360deg) translateY(-151px) !important; }
+}
+@media (max-width:700px) {
+  @keyframes lozixOrbit2sMobile {
+    from { transform: rotate(0deg) translateY(-128px) !important; }
+    to { transform: rotate(360deg) translateY(-128px) !important; }
+  }
+  
+}
+
+
+/* =========================================================
+   LOZIX TIMER ORBIT — EXACT POMODORO RING PATH
+   The Pomodoro ring is 320px wide with a 10px inner inset.
+   Its ring centerline radius is therefore 155px.
+   The dot's CENTER follows that same circumference.
+   One full revolution takes exactly 2 seconds.
+   ========================================================= */
+.pomodoro.running { animation:none !important; transform:none !important; }
+.orbit-dot {
+  position:absolute !important;
+  width:14px !important;
+  height:14px !important;
+  border-radius:50% !important;
+  top:50% !important;
+  left:50% !important;
+  margin:-7px 0 0 -7px !important;
+  transform-origin:center center !important;
+  animation:lozixExactOrbit 2s linear infinite !important;
+  animation-play-state:paused !important;
+  will-change:transform;
+}
+.pomodoro-wrap:has(.pomodoro.running) .orbit-dot {
+  animation-play-state:running !important;
+}
+@keyframes lozixExactOrbit {
+  from { transform:rotate(0deg) translateY(-155px); }
+  to   { transform:rotate(360deg) translateY(-155px); }
+}
+@media (max-width:700px) {
+  .orbit-dot { animation-name:lozixExactOrbitMobile !important; }
+  @keyframes lozixExactOrbitMobile {
+    from { transform:rotate(0deg) translateY(-130px); }
+    to   { transform:rotate(360deg) translateY(-130px); }
+  }
+}

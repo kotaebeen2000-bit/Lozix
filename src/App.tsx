@@ -63,16 +63,18 @@ function YouTubePlayer({ videoId, autoplay, onEnded }: { videoId: string; autopl
   const hostRef = useRef<HTMLDivElement | null>(null);
   const playerRef = useRef<any>(null);
   const onEndedRef = useRef(onEnded);
+  const initialVideoIdRef = useRef(videoId);
   onEndedRef.current = onEnded;
 
+  // Create ONE YouTube player and keep it alive while the app switches tabs/tracks.
+  // This is important for reliable automatic next-track playback.
   useEffect(() => {
     let cancelled = false;
     loadYouTubeApi().then((YT) => {
-      if (cancelled || !hostRef.current || !YT?.Player) return;
-      playerRef.current?.destroy?.();
+      if (cancelled || !hostRef.current || !YT?.Player || playerRef.current) return;
       playerRef.current = new YT.Player(hostRef.current, {
-        videoId,
-        playerVars: { controls: 1, rel: 0, playsinline: 1, modestbranding: 1, autoplay: autoplay ? 1 : 0 },
+        videoId: initialVideoIdRef.current,
+        playerVars: { controls: 1, rel: 0, playsinline: 1, modestbranding: 1, autoplay: 0 },
         events: {
           onStateChange: (event: any) => {
             if (event.data === YT.PlayerState.ENDED) onEndedRef.current();
@@ -85,6 +87,18 @@ function YouTubePlayer({ videoId, autoplay, onEnded }: { videoId: string; autopl
       playerRef.current?.destroy?.();
       playerRef.current = null;
     };
+  }, []);
+
+  // Change the video inside the same player instead of destroying/recreating the iframe.
+  // loadVideoById keeps the playback context alive when the user is on another tab.
+  useEffect(() => {
+    const player = playerRef.current;
+    if (!player?.loadVideoById) return;
+    if (autoplay) {
+      player.loadVideoById(videoId);
+    } else {
+      player.cueVideoById?.(videoId);
+    }
   }, [videoId]);
 
   useEffect(() => {
@@ -94,7 +108,6 @@ function YouTubePlayer({ videoId, autoplay, onEnded }: { videoId: string; autopl
 
   return <div ref={hostRef} className="youtube-player-host" />;
 }
-
 
 type StudyRecord = {
   id: string;
@@ -205,6 +218,7 @@ const HOLIDAY_NAMES: Record<string,string> = {
   "10-03":"개천절", "10-09":"한글날", "12-25":"성탄절"
 };
 
+// 음력 공휴일의 양력 날짜를 2040년까지 고정한다.
 const LUNAR_DATES: Record<number,{seollal:string;buddha:string;chuseok:string}> = {
   2025:{seollal:"2025-01-29",buddha:"2025-05-05",chuseok:"2025-10-06"},
   2026:{seollal:"2026-02-17",buddha:"2026-05-24",chuseok:"2026-09-25"},
@@ -212,50 +226,103 @@ const LUNAR_DATES: Record<number,{seollal:string;buddha:string;chuseok:string}> 
   2028:{seollal:"2028-01-27",buddha:"2028-05-02",chuseok:"2028-10-03"},
   2029:{seollal:"2029-02-13",buddha:"2029-05-20",chuseok:"2029-09-22"},
   2030:{seollal:"2030-02-03",buddha:"2030-05-09",chuseok:"2030-09-12"},
-  2031:{seollal:"2031-01-23",buddha:"2031-05-28",chuseok:"2031-09-30"},
-  2032:{seollal:"2032-02-11",buddha:"2032-05-17",chuseok:"2032-09-18"},
+  2031:{seollal:"2031-01-23",buddha:"2031-05-28",chuseok:"2031-10-01"},
+  2032:{seollal:"2032-02-11",buddha:"2032-05-16",chuseok:"2032-09-19"},
   2033:{seollal:"2033-01-31",buddha:"2033-05-06",chuseok:"2033-09-08"},
-  2034:{seollal:"2034-02-19",buddha:"2034-05-25",chuseok:"2034-09-27"},
+  2034:{seollal:"2034-02-20",buddha:"2034-05-25",chuseok:"2034-09-27"},
   2035:{seollal:"2035-02-08",buddha:"2035-05-15",chuseok:"2035-09-16"},
-  2036:{seollal:"2036-01-28",buddha:"2036-05-24",chuseok:"2036-10-03"},
+  2036:{seollal:"2036-01-28",buddha:"2036-05-03",chuseok:"2036-10-04"},
+  2037:{seollal:"2037-02-16",buddha:"2037-05-22",chuseok:"2037-09-24"},
+  2038:{seollal:"2038-02-04",buddha:"2038-05-11",chuseok:"2038-09-13"},
+  2039:{seollal:"2039-01-24",buddha:"2039-04-30",chuseok:"2039-10-02"},
+  2040:{seollal:"2040-02-13",buddha:"2040-05-18",chuseok:"2040-09-20"},
 };
 
 function ymd(d:Date){return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;}
 
 function buildKoreanHolidays(year:number){
-  const result = new Map<string,string>();
-  const add=(date:string,name:string)=>result.set(date,name);
-  Object.entries(HOLIDAY_NAMES).forEach(([md,name])=>add(`${year}-${md}`,name));
-  add(`${year}-05-01`,"근로자의 날");
+  const result=new Map<string,string>();
+  const entries:{date:string;name:string}[]=[];
+  const add=(date:string,name:string)=>{
+    entries.push({date,name});
+    const previous=result.get(date);
+    result.set(date,previous?`${previous} · ${name}`:name);
+  };
 
+  Object.entries(HOLIDAY_NAMES).forEach(([md,name])=>add(`${year}-${md}`,name));
   const lunar=LUNAR_DATES[year];
+  const seollalDates=new Set<string>();
+  const chuseokDates=new Set<string>();
+
   if(lunar){
     const seollal=new Date(lunar.seollal+"T00:00:00");
-    [-1,0,1].forEach(n=>{const d=new Date(seollal);d.setDate(d.getDate()+n);add(ymd(d),"설날");});
+    [-1,0,1].forEach((offset,index)=>{
+      const d=new Date(seollal); d.setDate(d.getDate()+offset);
+      const date=ymd(d); seollalDates.add(date);
+      add(date,index===1?"설날":"설날 연휴");
+    });
     add(lunar.buddha,"부처님 오신 날");
+
     const chuseok=new Date(lunar.chuseok+"T00:00:00");
-    [-1,0,1].forEach(n=>{const d=new Date(chuseok);d.setDate(d.getDate()+n);add(ymd(d),"추석");});
+    [-1,0,1].forEach((offset,index)=>{
+      const d=new Date(chuseok); d.setDate(d.getDate()+offset);
+      const date=ymd(d); chuseokDates.add(date);
+      add(date,index===1?"추석":"추석 연휴");
+    });
   }
 
-  // Current legal substitute-holiday rules:
-  // March 1, Liberation Day, National Foundation Day, Hangul Day,
-  // Buddha's Birthday, Labor Day, Children's Day, Christmas and
-  // Seollal/Chuseok holiday periods receive substitutes according to the
-  // regulation in force. We compute the first non-holiday day.
-  const original = new Set(result.keys());
-  const eligible = new Set<string>();
-  for(const [date,name] of result){
-    const d=new Date(date+"T00:00:00"), dow=d.getDay();
-    // 대체공휴일은 법정 대체공휴일 대상일이 주말/겹친 공휴일과 겹칠 때만 만들고,
-    // 대체 날짜 자체가 토·일요일이 되지 않도록 다음 평일까지 이동한다.
-    if(["삼일절","광복절","개천절","한글날","부처님 오신 날","어린이날","성탄절"].includes(name) &&
-       (dow===0 || dow===6)) eligible.add(date);
-    if((name==="설날" || name==="추석") && (dow===0 || dow===6)) eligible.add(date);
+  const fixedEligible=new Set([
+    "삼일절","어린이날","광복절","개천절","한글날",
+    "부처님 오신 날","성탄절"
+  ]);
+  const occupied=new Set(result.keys());
+  const fixedSources=new Set<string>();
+  const lunarTargets=new Set<string>();
+
+  // 단일 공휴일: 주말 또는 다른 공휴일과 겹칠 때 다음 평일을 대체공휴일로 지정.
+  for(const entry of entries){
+    if(!fixedEligible.has(entry.name)) continue;
+    const d=new Date(entry.date+"T00:00:00");
+    const weekend=d.getDay()===0||d.getDay()===6;
+    const overlap=entries.some(other=>other!==entry && other.date===entry.date);
+    if(weekend || (overlap && !seollalDates.has(entry.date) && !chuseokDates.has(entry.date))) fixedSources.add(entry.date);
   }
-  for(const date of eligible){
-    const d=new Date(date+"T00:00:00");
-    do{d.setDate(d.getDate()+1);}while(original.has(ymd(d)) || d.getDay()===0 || d.getDay()===6);
-    add(ymd(d),"대체공휴일");
+
+  // 설날/추석 3일 연휴는 연휴 전체에서 일요일 또는 다른 공휴일과 겹치면
+  // 대체공휴일을 1일만 만든다.
+  const addLunarSubstitute=(period:Set<string>,center:string)=>{
+    const periodHasSunday=[...period].some(date=>new Date(date+"T00:00:00").getDay()===0);
+    const periodOverlapsOtherHoliday=[...period].some(date=>
+      entries.some(other=>other.date===date && !period.has(other.date))
+    );
+    if(!periodHasSunday&&!periodOverlapsOtherHoliday) return;
+
+    const centerDate=new Date(center+"T00:00:00");
+    // 연휴 마지막 날 다음부터 시작해서 실제 공휴일/주말을 건너뛴다.
+    const last=new Date(centerDate); last.setDate(last.getDate()+1);
+    do{last.setDate(last.getDate()+1);}while(occupied.has(ymd(last))||last.getDay()===0||last.getDay()===6);
+    lunarTargets.add(ymd(last));
+  };
+
+  if(lunar){
+    addLunarSubstitute(seollalDates,lunar.seollal);
+    addLunarSubstitute(chuseokDates,lunar.chuseok);
+  }
+
+  // 고정일 대체공휴일은 실제 대상일별로 계산하되, 이미 음력 연휴 대체일이
+  // 차지한 날짜는 피한다.
+  for(const source of [...fixedSources]){
+    const d=new Date(source+"T00:00:00");
+    do{d.setDate(d.getDate()+1);}while(occupied.has(ymd(d))||lunarTargets.has(ymd(d))||d.getDay()===0||d.getDay()===6);
+    const target=ymd(d);
+    const previous=result.get(target);
+    result.set(target,previous?`${previous} · 대체공휴일`:"대체공휴일");
+    occupied.add(target);
+  }
+  for(const target of lunarTargets){
+    const previous=result.get(target);
+    result.set(target,previous?`${previous} · 대체공휴일`:"대체공휴일");
+    occupied.add(target);
   }
   return result;
 }
@@ -270,8 +337,8 @@ function App() {
   const [profilesLoading, setProfilesLoading] = useState(true);
   const [profileLoaded, setProfileLoaded] = useState(false);
   const [now, setNow] = useState(new Date());
-  const koreanHolidays = useMemo(() => buildKoreanHolidays(now.getFullYear()), [now]);
   const [viewDate, setViewDate] = useState(new Date());
+  const koreanHolidays = useMemo(() => buildKoreanHolidays(viewDate.getFullYear()), [viewDate]);
   const [selectedDate, setSelectedDate] = useState(dateKey(new Date()));
   const [records, setRecords] = useState<StudyRecord[]>([]);
   const [running, setRunning] = useState(false);
@@ -485,7 +552,7 @@ function App() {
         <div className="topbar-actions"><span className="active-profile-name">{activeProfile.name}</span><button className="logout-button" onClick={logOutProfile}>프로필 변경</button><div className="live-clock">{formatClock(now)}</div></div>
       </header>
 
-      <main className="content">
+      <main className={`content ${tab === "music" ? "music-content" : ""}`}>
         {tab === "calendar" && (
           <section>
             <div className="page-heading">
@@ -586,7 +653,7 @@ function App() {
                 <strong>{pad(timerMin)}:{pad(timerSec)}</strong>
                 <small>{running ? "집중 중" : "준비됨"}</small>
               </div>
-              </div><div className="orbit-dot" /></div>
+              </div><div className="orbit-dot" style={{ ["--orbit-angle" as string]: `${progress * 360}deg` }} /></div>
 
             <div className="mode-switch">
               <button className={timerMode === "focus" ? "active" : ""} onClick={() => switchMode("focus")}>집중 {focusMinutes}분</button>
