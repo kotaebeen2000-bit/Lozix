@@ -121,6 +121,34 @@ type StudyRecord = {
 type Profile = { id: string; name: string };
 type ActiveProfile = Profile & { pin: string };
 
+function readStudyGoal(key: string) {
+  const n = Number(localStorage.getItem(key) || 0);
+  return Number.isFinite(n) && n >= 0 ? n : 0;
+}
+function playLozixTimerAlarm() {
+  try {
+    const AC = window.AudioContext || (window as any).webkitAudioContext;
+    if (!AC) return;
+    const ctx = new AC();
+    const now = ctx.currentTime;
+    const gain = ctx.createGain();
+    gain.gain.setValueAtTime(0.0001, now);
+    gain.gain.exponentialRampToValueAtTime(0.32, now + 0.03);
+    gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.9);
+    gain.connect(ctx.destination);
+    const osc = ctx.createOscillator();
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(880, now);
+    osc.frequency.setValueAtTime(660, now + 0.3);
+    osc.frequency.setValueAtTime(880, now + 0.6);
+    osc.connect(gain);
+    osc.start(now);
+    osc.stop(now + 0.92);
+    setTimeout(() => ctx.close().catch(() => {}), 1200);
+  } catch {}
+}
+const WEEKLY_GOAL_KEY = 'study-app-v1-weekly-goal';
+const MONTHLY_GOAL_KEY = 'study-app-v1-monthly-goal';
 const STORAGE_KEY = "study-app-v1-records";
 
 const pad = (n: number) => String(n).padStart(2, "0");
