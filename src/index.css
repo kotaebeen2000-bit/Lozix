@@ -244,7 +244,6 @@ button:not(:disabled):hover { transform:translateY(-1px); }
 .music-content .youtube-frame{width:100%!important;padding-top:56.25%!important}
 .pomodoro.running{animation:none!important}
 
-.pomodoro-wrap:has(.pomodoro.running) 
 @media(max-width:700px){.music-content{max-width:100%!important}.music-content .music-page{max-width:100%!important}.music-content .youtube-frame{padding-top:56.25%!important}}
 
 
