@@ -458,3 +458,61 @@ button:not(:disabled):hover { transform:translateY(-1px); }
 @media (max-width:700px) {
   .stats-goal-panel { grid-template-columns:1fr; }
 }
+
+/* Settings tab */
+.settings-page { max-width: 760px; margin: 0 auto; }
+.settings-card { background:#11141b; border:1px solid #242936; border-radius:22px; padding:22px; margin-bottom:18px; box-shadow:0 8px 28px rgba(0,0,0,.12); }
+.settings-heading { display:flex; justify-content:space-between; align-items:center; gap:16px; margin-bottom:8px; }
+.settings-heading h2 { color:#f1f3fb; }
+.settings-heading > span { color:#aeb8ff; font-size:12px; font-weight:800; }
+.settings-row { display:flex; align-items:center; justify-content:space-between; gap:18px; padding:17px 0; border-top:1px solid #242936; }
+.settings-row > div:first-child { display:flex; flex-direction:column; gap:5px; min-width:0; }
+.settings-row strong { color:#eef0f7; font-size:14px; }
+.settings-row small { color:#858ea1; font-size:11px; }
+.settings-pin-summary code { color:#aeb8ff; font-size:15px; letter-spacing:.12em; background:#0b0e14; border:1px solid #2a3040; padding:8px 11px; border-radius:10px; }
+.pin-form { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:10px; padding-top:15px; }
+.pin-form label { display:grid; gap:7px; color:#b9c1d4; font-size:11px; font-weight:800; }
+.pin-form input, .settings-number input { border:1px solid #303747; background:#0b0e14; color:#edf0f8; border-radius:10px; padding:11px; outline:0; }
+.pin-form input:focus, .settings-number input:focus { border-color:#7489f6; }
+.pin-form button { grid-column:1/-1; }
+.settings-message { margin:13px 0 0; color:#aeb8ff; font-size:12px; }
+.settings-number { display:flex; align-items:center; gap:7px; color:#858ea1; font-size:12px; }
+.settings-number input { width:86px; text-align:center; }
+.theme-switch { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:14px; }
+.theme-switch button { border:1px solid #303747; border-radius:12px; padding:13px 12px; background:#0b0e14; color:#aeb6c8; font-weight:800; }
+.theme-switch button.active { background:#202747; border-color:#657bf0; color:#eef1ff; }
+
+/* Light theme overrides */
+.app-shell.light-theme { background:#f6f7fb; color:#1d2433; }
+.app-shell.light-theme .topbar { background:rgba(255,255,255,.92); border-color:#e8eaf0; }
+.app-shell.light-theme .today-small, .app-shell.light-theme .live-clock { color:#72798a; }
+.app-shell.light-theme .calendar-card, .app-shell.light-theme .records-card, .app-shell.light-theme .goal-card, .app-shell.light-theme .chart-card, .app-shell.light-theme .timer-note, .app-shell.light-theme .session-info, .app-shell.light-theme .settings-card, .app-shell.light-theme .stat-cards > div { background:#fff; border-color:#e7e9ef; box-shadow:0 8px 28px rgba(32,42,64,.05); }
+.app-shell.light-theme .day { background:#fff; border-color:#f0f1f4; color:#3b4253; }
+.app-shell.light-theme .day.empty { background:#fbfbfd; }
+.app-shell.light-theme .day:hover { background:#fafbfe; }
+.app-shell.light-theme .day.selected { background:#f0f4ff; }
+.app-shell.light-theme .month-nav button { background:#fff; color:#596175; border-color:#e1e4eb; }
+.app-shell.light-theme .pomodoro { background:conic-gradient(#6078d8 var(--progress),#e9ebf2 var(--progress)); box-shadow:none; }
+.app-shell.light-theme .pomodoro::before { background:#fff; border-color:#e7e9ef; }
+.app-shell.light-theme .pomodoro-inner span, .app-shell.light-theme .pomodoro-inner small { color:#9097a7; }
+.app-shell.light-theme .timer-clock { color:#566078; }
+.app-shell.light-theme .mode-switch { background:#eceef3; }
+.app-shell.light-theme .mode-switch button { color:#737b8c; }
+.app-shell.light-theme .mode-switch button.active { background:#fff; color:#4e5fc1; }
+.app-shell.light-theme .timer-length-box { background:#fff; border-color:#e7e9ef; color:#1d2433; }
+.app-shell.light-theme .timer-length-control input, .app-shell.light-theme .settings-number input, .app-shell.light-theme .pin-form input { background:#fff; color:#1d2433; border-color:#dfe3eb; }
+.app-shell.light-theme .settings-heading h2, .app-shell.light-theme .settings-row strong { color:#1d2433; }
+.app-shell.light-theme .settings-row { border-color:#edf0f4; }
+.app-shell.light-theme .settings-pin-summary code { background:#f7f8fb; color:#5269cb; border-color:#e1e4eb; }
+.app-shell.light-theme .theme-switch button { background:#fff; color:#596175; border-color:#e1e4eb; }
+.app-shell.light-theme .theme-switch button.active { background:#eef1ff; border-color:#657bf0; color:#5269cb; }
+.app-shell.light-theme .bottom-nav { background:rgba(255,255,255,.94); border-color:#e3e5eb; box-shadow:0 10px 32px rgba(30,40,60,.13); }
+.app-shell.light-theme .bottom-nav button.active { background:#eef1ff; color:#5269cb; }
+.app-shell.light-theme .stat-cards span { color:#9097a7; }
+
+@media (max-width:700px) {
+  .pin-form { grid-template-columns:1fr; }
+  .settings-row { align-items:flex-start; }
+  .settings-number { flex-shrink:0; }
+  .theme-switch { grid-template-columns:1fr; }
+}

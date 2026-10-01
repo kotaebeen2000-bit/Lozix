@@ -103,5 +103,29 @@ grant execute on function public.login_lozix_profile(text, text) to anon, authen
 grant execute on function public.load_lozix_data(uuid, text) to anon, authenticated;
 grant execute on function public.save_lozix_data(uuid, text, jsonb, jsonb) to anon, authenticated;
 
+
+create or replace function public.change_lozix_pin(profile_id uuid, current_pin text, new_pin text)
+returns void language plpgsql security definer set search_path = public as $$
+begin
+  if current_pin is null or current_pin !~ '^[0-9]{4,8}$' then
+    raise exception '기존 PIN은 숫자 4~8자리여야 합니다.';
+  end if;
+  if new_pin is null or new_pin !~ '^[0-9]{4,8}$' then
+    raise exception '새 PIN은 숫자 4~8자리여야 합니다.';
+  end if;
+  if not exists (
+    select 1 from public.lozix_profiles
+    where id = profile_id and pin_hash = md5('lozix-pin-v1:' || current_pin)
+  ) then
+    raise exception '기존 PIN이 맞지 않습니다.';
+  end if;
+  update public.lozix_profiles
+  set pin_hash = md5('lozix-pin-v1:' || new_pin)
+  where id = profile_id;
+end;
+$$;
+
+grant execute on function public.change_lozix_pin(uuid, text, text) to anon, authenticated;
+
 -- 핵심: PostgREST RPC 스키마 캐시 새로고침
 notify pgrst, 'reload schema';

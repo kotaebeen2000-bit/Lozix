@@ -29,3 +29,7 @@ npm run dev
 
 ## 중요
 Supabase에서 pgcrypto가 extensions 스키마에 설치되는 환경을 지원하도록 함수 내부에서 새 프로필 PIN은 `gen_salt()`에 의존하지 않고 PostgreSQL 기본 `md5()` 기반으로 저장하며, 기존 bcrypt PIN은 `pgcrypto`로 계속 로그인할 수 있습니다.
+
+## PIN 변경 기능 추가
+
+기존에 Supabase 설정을 완료한 상태라면 업데이트된 `supabase-fix.sql`을 SQL Editor에서 한 번 실행하세요. `change_lozix_pin` RPC가 추가되며 기존 프로필과 학습 기록은 유지됩니다.

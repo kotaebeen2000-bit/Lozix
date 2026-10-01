@@ -21,3 +21,12 @@
 
 
 Music playback fix: YouTube player initialization now waits until the profile screen has been passed, so the player DOM exists before the API is created.
+
+## 설정 탭
+
+- 다크 모드 / 라이트 모드
+- 집중 시간 / 휴식 시간 기본값(1~180분)
+- 현재 PIN 일부 표시(앞 2자리만 표시)
+- 기존 PIN 확인 후 새 PIN 4~8자리 변경
+
+PIN 변경 기능을 사용하려면 Supabase SQL Editor에서 업데이트된 `supabase-fix.sql`을 한 번 실행하세요. 기존 프로필과 학습 기록은 유지됩니다.

@@ -9,7 +9,7 @@ declare global {
   }
 }
 
-type Tab = "calendar" | "timer" | "music" | "stats";
+type Tab = "calendar" | "timer" | "music" | "stats" | "settings";
 
 type MusicTrack = {
   title: string;
@@ -242,7 +242,7 @@ function loadRecords(): StudyRecord[] {
 // year table and can be extended when official lunar dates are published.
 const HOLIDAY_NAMES: Record<string,string> = {
   "01-01":"신정", "03-01":"삼일절", "05-01":"근로자의 날",
-  "05-05":"어린이날", "06-06":"현충일", "08-15":"광복절",
+  "05-05":"어린이날", "06-06":"현충일", "07-17":"제헌절", "08-15":"광복절",
   "10-03":"개천절", "10-09":"한글날", "12-25":"성탄절"
 };
 
@@ -257,7 +257,7 @@ const LUNAR_DATES: Record<number,{seollal:string;buddha:string;chuseok:string}> 
   2031:{seollal:"2031-01-23",buddha:"2031-05-28",chuseok:"2031-10-01"},
   2032:{seollal:"2032-02-11",buddha:"2032-05-16",chuseok:"2032-09-19"},
   2033:{seollal:"2033-01-31",buddha:"2033-05-06",chuseok:"2033-09-08"},
-  2034:{seollal:"2034-02-20",buddha:"2034-05-25",chuseok:"2034-09-27"},
+  2034:{seollal:"2034-02-19",buddha:"2034-05-25",chuseok:"2034-09-27"},
   2035:{seollal:"2035-02-08",buddha:"2035-05-15",chuseok:"2035-09-16"},
   2036:{seollal:"2036-01-28",buddha:"2036-05-03",chuseok:"2036-10-04"},
   2037:{seollal:"2037-02-16",buddha:"2037-05-22",chuseok:"2037-09-24"},
@@ -267,6 +267,15 @@ const LUNAR_DATES: Record<number,{seollal:string;buddha:string;chuseok:string}> 
 };
 
 function ymd(d:Date){return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;}
+
+// 임기만료 선거일도 공휴일법상 공휴일이므로 2026~2035년 예정일을 표시한다.
+const ELECTION_HOLIDAYS: Record<number,{date:string;name:string}[]> = {
+  2026:[{date:"2026-06-03",name:"전국동시지방선거"}],
+  2028:[{date:"2028-04-12",name:"국회의원선거"}],
+  2030:[{date:"2030-03-27",name:"대통령선거"},{date:"2030-06-12",name:"전국동시지방선거"}],
+  2032:[{date:"2032-04-14",name:"국회의원선거"}],
+  2034:[{date:"2034-06-07",name:"전국동시지방선거"}],
+};
 
 function buildKoreanHolidays(year:number){
   const result=new Map<string,string>();
@@ -278,6 +287,7 @@ function buildKoreanHolidays(year:number){
   };
 
   Object.entries(HOLIDAY_NAMES).forEach(([md,name])=>add(`${year}-${md}`,name));
+  (ELECTION_HOLIDAYS[year] || []).forEach(({date,name})=>add(date,name));
   const lunar=LUNAR_DATES[year];
   const seollalDates=new Set<string>();
   const chuseokDates=new Set<string>();
@@ -379,6 +389,11 @@ function App() {
   const [goalMinutes, setGoalMinutes] = useState("60");
   const [focusMinutes, setFocusMinutes] = useState("25");
   const [breakMinutes, setBreakMinutes] = useState("5");
+  const [theme, setTheme] = useState<"dark" | "light">(() => (localStorage.getItem("lozix-theme") === "light" ? "light" : "dark"));
+  const [currentPin, setCurrentPin] = useState("");
+  const [newPin, setNewPin] = useState("");
+  const [confirmNewPin, setConfirmNewPin] = useState("");
+  const [pinMessage, setPinMessage] = useState("");
   const [timerLengthDraft, setTimerLengthDraft] = useState("25");
   const [selectedChartDate, setSelectedChartDate] = useState<string | null>(null);
   const [selectedTrackIndex, setSelectedTrackIndex] = useState(0);
@@ -393,6 +408,26 @@ function App() {
   useEffect(() => {
     refreshProfiles();
   }, []);
+
+  useEffect(() => {
+    localStorage.setItem("lozix-theme", theme);
+  }, [theme]);
+
+  useEffect(() => {
+    if (!activeProfile) return;
+    try {
+      const saved = JSON.parse(localStorage.getItem(`lozix-timer-settings-${activeProfile.id}`) || "{}");
+      const focus = Number(saved.focusMinutes);
+      const rest = Number(saved.breakMinutes);
+      if (Number.isFinite(focus) && focus >= 1 && focus <= 180) { setFocusMinutes(String(Math.round(focus))); setTimerLengthDraft(String(Math.round(focus))); }
+      if (Number.isFinite(rest) && rest >= 1 && rest <= 180) setBreakMinutes(String(Math.round(rest)));
+    } catch {}
+  }, [activeProfile]);
+
+  useEffect(() => {
+    if (!activeProfile) return;
+    localStorage.setItem(`lozix-timer-settings-${activeProfile.id}`, JSON.stringify({ focusMinutes: Number(focusMinutes), breakMinutes: Number(breakMinutes) }));
+  }, [activeProfile, focusMinutes, breakMinutes]);
 
   useEffect(() => {
     if (!activeProfile || !profileLoaded) return;
@@ -454,7 +489,7 @@ function App() {
 
   async function openProfile() {
     const name = profileName.trim();
-    if (!name || !/^\d{4}$/.test(profilePin)) { setProfileMessage("이름과 숫자 4자리 PIN을 입력하세요."); return; }
+    if (!name || !/^\d{4,8}$/.test(profilePin)) { setProfileMessage("이름과 숫자 4~8자리 PIN을 입력하세요."); return; }
     setProfileMessage("PIN을 확인하는 중입니다…");
     const { data, error } = await supabase.rpc("login_lozix_profile", { profile_name: name, profile_pin: profilePin });
     if (error || !data) { setProfileMessage(error?.message ?? "이름 또는 PIN이 맞지 않습니다."); return; }
@@ -476,6 +511,22 @@ function App() {
     const profile = { id: data as string, name };
     setProfiles(current => [...current, profile]);
     await loadProfile(profile, profilePin);
+  }
+
+  async function changePin() {
+    if (!activeProfile) return;
+    if (!/^\d{4,8}$/.test(currentPin)) { setPinMessage("기존 PIN은 숫자 4~8자리로 입력하세요."); return; }
+    if (!/^\d{4,8}$/.test(newPin)) { setPinMessage("새 PIN은 숫자 4~8자리로 입력하세요."); return; }
+    if (newPin !== confirmNewPin) { setPinMessage("새 PIN 확인이 일치하지 않습니다."); return; }
+    if (currentPin === newPin) { setPinMessage("기존 PIN과 다른 PIN을 입력하세요."); return; }
+    setPinMessage("PIN을 변경하는 중입니다…");
+    const { error } = await supabase.rpc("change_lozix_pin", { profile_id: activeProfile.id, current_pin: currentPin, new_pin: newPin });
+    if (error) { setPinMessage(error.message || "PIN 변경에 실패했습니다."); return; }
+    setActiveProfile(prev => prev ? { ...prev, pin: newPin } : prev);
+    setCurrentPin("");
+    setNewPin("");
+    setConfirmNewPin("");
+    setPinMessage("PIN이 변경되었습니다. 다음 로그인부터 새 PIN이 적용됩니다.");
   }
 
   function logOutProfile() {
@@ -571,7 +622,7 @@ function App() {
   }
 
   return (
-    <div className="app-shell">
+    <div className={`app-shell ${theme === "light" ? "light-theme" : "dark-theme"}`}>
       <header className="topbar">
         <div>
           <div className="brand">LOZIX</div>
@@ -825,20 +876,71 @@ function App() {
 
             <div className="records-card">
               <h2>최근 학습 기록</h2>
-              {records.length === 0 ? (
-                <div className="empty-state">아직 저장된 학습 기록이 없습니다.</div>
-              ) : (
-                records.slice(0, 10).map((r) => (
-                  <div className="record-row" key={r.id}>
-                    <div className="record-icon">✓</div>
-                    <div className="record-main">
-                      <strong>{r.name}</strong>
-                      <span>{r.date} · {r.start} → {r.end}</span>
+              {(() => {
+                const cutoff = new Date(now);
+                cutoff.setHours(0, 0, 0, 0);
+                cutoff.setDate(cutoff.getDate() - 2);
+                const cutoffKey = dateKey(cutoff);
+                const todayKey = dateKey(now);
+                const recentRecords = records.filter((r) => r.date >= cutoffKey && r.date <= todayKey);
+                return recentRecords.length === 0 ? (
+                  <div className="empty-state">최근 3일 동안 저장된 학습 기록이 없습니다.</div>
+                ) : (
+                  recentRecords.slice(0, 10).map((r) => (
+                    <div className="record-row" key={r.id}>
+                      <div className="record-icon">✓</div>
+                      <div className="record-main">
+                        <strong>{r.name}</strong>
+                        <span>{r.date} · {r.start} → {r.end}</span>
+                      </div>
+                      <strong>{formatDuration(r.seconds)}</strong>
                     </div>
-                    <strong>{formatDuration(r.seconds)}</strong>
-                  </div>
-                ))
-              )}
+                  ))
+                );
+              })()}
+            </div>
+          </section>
+        )}
+
+        {tab === "settings" && (
+          <section className="settings-page">
+            <div className="page-heading">
+              <div><p className="eyebrow">SETTINGS</p><h1>설정</h1></div>
+            </div>
+
+            <div className="settings-card">
+              <div className="settings-heading"><div><p className="eyebrow">PROFILE</p><h2>프로필</h2></div><span>{activeProfile.name}</span></div>
+              <div className="settings-row settings-pin-summary">
+                <div><strong>현재 PIN</strong><small>보안을 위해 일부만 표시합니다.</small></div>
+                <code>{activeProfile.pin.slice(0, 2)}{"*".repeat(Math.max(0, activeProfile.pin.length - 2))}</code>
+              </div>
+              <div className="pin-form">
+                <label>기존 PIN<input inputMode="numeric" type="password" maxLength={8} value={currentPin} onChange={e=>setCurrentPin(e.target.value.replace(/\D/g, ""))} placeholder="현재 PIN" /></label>
+                <label>새 PIN<input inputMode="numeric" type="password" maxLength={8} value={newPin} onChange={e=>setNewPin(e.target.value.replace(/\D/g, ""))} placeholder="4~8자리" /></label>
+                <label>새 PIN 확인<input inputMode="numeric" type="password" maxLength={8} value={confirmNewPin} onChange={e=>setConfirmNewPin(e.target.value.replace(/\D/g, ""))} placeholder="새 PIN 다시 입력" /></label>
+                <button className="primary" onClick={changePin}>PIN 변경 저장</button>
+              </div>
+              {pinMessage && <p className="settings-message" role="status">{pinMessage}</p>}
+            </div>
+
+            <div className="settings-card">
+              <div className="settings-heading"><div><p className="eyebrow">STUDY</p><h2>공부 설정</h2></div></div>
+              <div className="settings-row">
+                <div><strong>집중 시간</strong><small>타이머의 기본 집중 시간을 설정합니다.</small></div>
+                <div className="settings-number"><input type="number" min="1" max="180" value={focusMinutes} onChange={e=>{ const v=Math.max(1,Math.min(180,Number(e.target.value)||1)); setFocusMinutes(String(v)); if(timerMode === "focus") setTimerLengthDraft(String(v)); }} /><span>분</span></div>
+              </div>
+              <div className="settings-row">
+                <div><strong>휴식 시간</strong><small>타이머의 기본 휴식 시간을 설정합니다.</small></div>
+                <div className="settings-number"><input type="number" min="1" max="180" value={breakMinutes} onChange={e=>{ const v=Math.max(1,Math.min(180,Number(e.target.value)||1)); setBreakMinutes(String(v)); if(timerMode === "break") setTimerLengthDraft(String(v)); }} /><span>분</span></div>
+              </div>
+            </div>
+
+            <div className="settings-card">
+              <div className="settings-heading"><div><p className="eyebrow">APPEARANCE</p><h2>화면</h2></div></div>
+              <div className="theme-switch">
+                <button className={theme === "dark" ? "active" : ""} onClick={()=>setTheme("dark")}>🌙 다크 모드</button>
+                <button className={theme === "light" ? "active" : ""} onClick={()=>setTheme("light")}>☀️ 라이트 모드</button>
+              </div>
             </div>
           </section>
         )}
@@ -849,6 +951,7 @@ function App() {
         <button className={tab === "timer" ? "active" : ""} onClick={() => setTab("timer")}><span>◷</span>타이머</button>
         <button className={tab === "music" ? "active" : ""} onClick={() => setTab("music")}><span>♫</span>음악</button>
         <button className={tab === "stats" ? "active" : ""} onClick={() => setTab("stats")}><span>▥</span>통계</button>
+        <button className={tab === "settings" ? "active" : ""} onClick={() => setTab("settings")}><span>⚙</span>설정</button>
       </nav>
     </div>
   );
