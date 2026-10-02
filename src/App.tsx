@@ -9,7 +9,7 @@ declare global {
   }
 }
 
-type Tab = "calendar" | "timer" | "music" | "stats" | "settings";
+type Tab = "calendar" | "timer" | "music" | "stats" | "ai" | "settings";
 
 type MusicTrack = {
   title: string;
@@ -396,6 +396,10 @@ function App() {
   const [pinMessage, setPinMessage] = useState("");
   const [timerLengthDraft, setTimerLengthDraft] = useState("25");
   const [selectedChartDate, setSelectedChartDate] = useState<string | null>(null);
+  const [aiMessages, setAiMessages] = useState<{ role: "user" | "assistant"; content: string }[]>([]);
+  const [aiInput, setAiInput] = useState("");
+  const [aiLoading, setAiLoading] = useState(false);
+  const [aiError, setAiError] = useState("");
   const [selectedTrackIndex, setSelectedTrackIndex] = useState(0);
   const [autoplayTrack, setAutoplayTrack] = useState(false);
   const selectedTrackIndexRef = useRef(0);
@@ -511,6 +515,33 @@ function App() {
     const profile = { id: data as string, name };
     setProfiles(current => [...current, profile]);
     await loadProfile(profile, profilePin);
+  }
+
+  async function askAi() {
+    const message = aiInput.trim();
+    if (!message || aiLoading) return;
+
+    const nextMessages = [...aiMessages, { role: "user" as const, content: message }];
+    setAiMessages(nextMessages);
+    setAiInput("");
+    setAiError("");
+    setAiLoading(true);
+
+    try {
+      const response = await fetch("/api/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ messages: nextMessages }),
+      });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(data?.error || "AI 호출에 실패했습니다.");
+      if (!data?.answer) throw new Error("AI가 답변을 반환하지 않았습니다.");
+      setAiMessages(prev => [...prev, { role: "assistant", content: String(data.answer) }]);
+    } catch (error) {
+      setAiError(error instanceof Error ? error.message : "AI 호출에 실패했습니다.");
+    } finally {
+      setAiLoading(false);
+    }
   }
 
   async function changePin() {
@@ -902,6 +933,59 @@ function App() {
           </section>
         )}
 
+        {tab === "ai" && (
+          <section className="ai-page">
+            <div className="page-heading">
+              <div><p className="eyebrow">AI STUDY HELPER</p><h1>AI 공부 도우미</h1></div>
+            </div>
+
+            <div className="ai-card">
+              <div className="ai-messages">
+                {aiMessages.length === 0 ? (
+                  <div className="ai-empty">
+                    <strong>공부하다 궁금한 것을 물어보세요.</strong>
+                    <span>개념 설명, 문제 풀이, 영어 문법, 한국사 등 학습 질문을 도와줄게요.</span>
+                  </div>
+                ) : (
+                  aiMessages.map((message, index) => (
+                    <div className={`ai-message ${message.role}`} key={`${message.role}-${index}`}>
+                      <span className="ai-message-label">{message.role === "user" ? "나" : "AI"}</span>
+                      <div className="ai-message-content">{message.content}</div>
+                    </div>
+                  ))
+                )}
+                {aiLoading && (
+                  <div className="ai-message assistant">
+                    <span className="ai-message-label">AI</span>
+                    <div className="ai-message-content">답변을 생각하고 있어요…</div>
+                  </div>
+                )}
+              </div>
+
+              <div className="ai-input-row">
+                <textarea
+                  value={aiInput}
+                  onChange={e => setAiInput(e.target.value)}
+                  onKeyDown={e => {
+                    if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) {
+                      e.preventDefault();
+                      void askAi();
+                    }
+                  }}
+                  placeholder="예: 현재진행형을 쉽게 설명해줘"
+                  rows={3}
+                  disabled={aiLoading}
+                />
+                <button className="primary" onClick={() => void askAi()} disabled={aiLoading || !aiInput.trim()}>
+                  {aiLoading ? "답변 중…" : "질문하기"}
+                </button>
+              </div>
+              {aiError && <p className="ai-error" role="alert">{aiError}</p>}
+              <p className="ai-note">Enter는 줄바꿈 · Ctrl+Enter로 질문 보내기</p>
+            </div>
+          </section>
+        )}
+
         {tab === "settings" && (
           <section className="settings-page">
             <div className="page-heading">
@@ -951,6 +1035,7 @@ function App() {
         <button className={tab === "timer" ? "active" : ""} onClick={() => setTab("timer")}><span>◷</span>타이머</button>
         <button className={tab === "music" ? "active" : ""} onClick={() => setTab("music")}><span>♫</span>음악</button>
         <button className={tab === "stats" ? "active" : ""} onClick={() => setTab("stats")}><span>▥</span>통계</button>
+        <button className={tab === "ai" ? "active" : ""} onClick={() => setTab("ai")}><span>✦</span>AI</button>
         <button className={tab === "settings" ? "active" : ""} onClick={() => setTab("settings")}><span>⚙</span>설정</button>
       </nav>
     </div>
