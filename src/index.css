@@ -228,9 +228,6 @@ button:not(:disabled):hover { transform:translateY(-1px); }
   *,*::before,*::after { animation-duration:.001ms !important; animation-iteration-count:1 !important; transition-duration:.001ms !important; scroll-behavior:auto !important; }
 }
 
-/* Music tab */
-.music-page{max-width:860px;margin:0 auto}.music-background-player{position:fixed!important;left:-9999px!important;top:0!important;width:2px!important;height:2px!important;overflow:hidden!important;opacity:0!important;pointer-events:none!important}.track-count{padding:8px 12px;border:1px solid #303747;border-radius:999px;color:#aeb8ff;font-weight:800;font-size:12px;background:#11141b}.music-player-card,.playlist-card{background:#11141b;border:1px solid #242936;border-radius:18px;overflow:hidden;box-shadow:0 16px 36px rgba(0,0,0,.16)}.music-player-card{margin-bottom:20px}.now-playing{padding:24px 24px 18px;background:linear-gradient(135deg,rgba(101,123,240,.2),rgba(155,134,246,.08))}.playing-label{display:block;color:#aeb8ff;font-size:10px;font-weight:900;letter-spacing:.14em;margin-bottom:8px}.now-playing h2{margin:0;color:#f1f3fb;font-size:25px}.now-playing p{margin:7px 0 0;color:#a9b1c2;font-size:14px}.youtube-frame{position:relative;padding-top:62.5%;background:#080a0f}.youtube-frame>div{position:absolute;inset:0;width:100%;height:100%}.youtube-player-host,.youtube-frame iframe{width:100%;height:100%;border:0}.stats-title{color:#fff!important}.music-controls{display:flex;align-items:center;gap:11px;padding:14px 24px;background:#0d1017;border-top:1px solid #242936;color:#aeb8ff;font-size:12px;font-weight:800}.music-controls label{display:flex;align-items:center;gap:8px;flex:1}.music-controls input{accent-color:#7489f6;width:100%}.mute-button{width:36px;height:32px;border:1px solid #303747;border-radius:9px;background:#1b2130;color:#dbe1ff;cursor:pointer}.music-note{padding:13px 24px;margin:0;color:#858ea1;font-size:12px}.playlist-heading{display:flex;justify-content:space-between;align-items:center;padding:21px 22px 17px;border-bottom:1px solid #242936}.playlist-heading h2{margin:3px 0 0;font-size:18px}.playlist-heading>span{color:#8e9aff;font-size:12px;font-weight:800}.track-list{padding:7px}.track-row{width:100%;display:flex;align-items:center;gap:14px;border:0;border-radius:12px;background:transparent;color:#dce1ed;text-align:left;padding:12px 13px;cursor:pointer}.track-row:hover{background:#181d2a}.track-row.active{background:#202747}.track-number{width:25px;color:#77819a;font-size:12px;font-weight:800}.track-row.active .track-number{color:#aeb8ff}.track-details{display:flex;min-width:0;flex:1;flex-direction:column;gap:4px}.track-details strong{font-size:14px;color:#edf0f8}.track-details small{color:#8992a5;font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.track-play{color:#aeb8ff;font-size:11px;font-weight:800;min-width:38px;text-align:right}.track-row:not(.active) .track-play{font-size:12px;color:#737d92}.bottom-nav button{padding-left:13px;padding-right:13px}@media(max-width:700px){.music-page .page-heading{align-items:flex-start}.now-playing{padding:19px}.now-playing h2{font-size:21px}.music-controls{padding:12px 16px}.music-note{padding:12px 16px}.playlist-heading{padding:18px 16px}.track-row{padding:11px 9px;gap:10px}.bottom-nav{gap:3px}.bottom-nav button{font-size:10px;padding-left:5px;padding-right:5px}}
-
 /* Supabase profile screen */
 .profile-shell{min-height:100vh;display:grid;place-items:center;padding:24px;background:radial-gradient(circle at 50% 0,#202846 0,#080a0f 52%);color:#edf0f8}.profile-card{width:min(100%,480px);padding:32px;border:1px solid #2b3242;border-radius:22px;background:rgba(17,20,27,.96);box-shadow:0 22px 60px rgba(0,0,0,.35)}.profile-card .brand{margin-bottom:28px}.profile-card h1{font-size:28px;margin:5px 0}.profile-help{color:#939caf;font-size:13px;margin:0 0 20px}.profile-list{display:flex;flex-wrap:wrap;gap:8px;min-height:37px;margin-bottom:16px}.profile-list>span{font-size:12px;color:#8a93a6}.profile-list button{border:1px solid #30394c;border-radius:999px;padding:8px 13px;background:#171c27;color:#cdd4e6;cursor:pointer}.profile-list button.selected{background:#394b9b;border-color:#7185ed;color:#fff}.profile-form{display:grid;gap:12px}.profile-form label{display:grid;gap:7px;font-size:12px;font-weight:800;color:#b9c1d4}.profile-form input{border:1px solid #30394c;border-radius:10px;background:#0b0e14;color:#edf0f8;padding:12px;font-size:15px;outline:0}.profile-form input:focus{border-color:#7489f6}.profile-message{min-height:20px;margin:14px 0 8px;color:#aeb8ff;font-size:12px}.profile-actions{display:flex;gap:9px}.profile-actions button{flex:1;padding:12px}.profile-footnote{margin:17px 0 0;color:#7f899d;font-size:11px;text-align:center}.topbar-actions{display:flex;align-items:center;gap:10px}.active-profile-name{font-size:12px;color:#bfc8ff;font-weight:800}.logout-button{border:1px solid #30394c;border-radius:8px;background:#171c27;color:#cdd4e6;padding:7px 9px;font-size:11px;cursor:pointer}@media(max-width:700px){.profile-card{padding:24px 19px}.topbar-actions{gap:6px}.active-profile-name{display:none}.logout-button{padding:6px}.live-clock{font-size:12px}}
 
@@ -239,14 +236,6 @@ button:not(:disabled):hover { transform:translateY(-1px); }
 .stats-title{color:#fff!important}
 .stat-cards>div{background:#11141b!important;border-color:#242936!important}
 .stat-cards span,.stat-cards strong{color:#fff!important}
-.music-content{max-width:1180px!important}
-.music-content .music-page{max-width:1120px!important;width:100%!important}
-.music-content .youtube-frame{width:100%!important;padding-top:56.25%!important}
-.pomodoro.running{animation:none!important}
-
-@media(max-width:700px){.music-content{max-width:100%!important}.music-content .music-page{max-width:100%!important}.music-content .youtube-frame{padding-top:56.25%!important}}
-
-
 /* ===== LOZIX FINAL REQUESTED FIXES ===== */
 
 /* Statistics: prevent heading/card text collision caused by typography overrides. */
@@ -291,32 +280,6 @@ button:not(:disabled):hover { transform:translateY(-1px); }
    Radius 155px = centerline of the 10px ring on the 320px circle. */
 
 
-/* Music: make the player/card substantially larger in the music tab. */
-.music-content {
-  max-width:1280px !important;
-}
-.music-content .music-page {
-  width:100% !important;
-  max-width:1200px !important;
-}
-.music-content .music-player-card {
-  width:100% !important;
-}
-.music-content .youtube-frame {
-  width:100% !important;
-  padding-top:70% !important;
-}
-
-@media (max-width:700px) {
-  .stats-title { white-space:normal !important; }
-  .stat-cards > div { min-height:96px !important; }
-  .music-content { max-width:100% !important; }
-  .music-content .music-page { max-width:100% !important; }
-  .music-content .youtube-frame { padding-top:70% !important; }
-  
-}
-
-
 /* =========================================================
    LOZIX FINAL VISUAL FIX — DO NOT CHANGE APPLICATION LOGIC
    ========================================================= */
@@ -358,44 +321,6 @@ button:not(:disabled):hover { transform:translateY(-1px); }
   animation:none !important;
   transform:none !important;
 }
-
-
-/* MUSIC: make the actual YouTube viewport substantially larger.
-   Use an explicit height so the YouTube iframe cannot collapse to its
-   API default height or leave a large unused black area. */
-.music-content .music-page {
-  width:100% !important;
-  max-width:1120px !important;
-}
-.music-content .music-player-card {
-  width:100% !important;
-}
-.music-content .youtube-frame {
-  width:100% !important;
-  height:min(60vw, 620px) !important;
-  min-height:420px !important;
-  max-height:620px !important;
-  padding-top:0 !important;
-  aspect-ratio:auto !important;
-  overflow:hidden !important;
-}
-.music-content .youtube-frame > div,
-.music-content .youtube-player-host,
-.music-content .youtube-frame iframe {
-  width:100% !important;
-  height:100% !important;
-  min-height:100% !important;
-  max-height:none !important;
-}
-@media (max-width:700px) {
-  .music-content .music-page { max-width:100% !important; }
-  .music-content .youtube-frame {
-    height:calc((100vw - 28px) * .5625) !important;
-    min-height:0 !important;
-    max-height:none !important;
-  }
-}
-
 
 
 /* =========================================================
@@ -570,6 +495,10 @@ button:not(:disabled):hover { transform:translateY(-1px); }
 .app-shell.light-theme .ai-chat-select span { color:#7b8495; }
 .app-shell.light-theme .ai-chat-rename { color:#667085; }
 .app-shell.light-theme .ai-chat-rename:hover { background:#e9edf5; color:#344054; }
+.ai-chat-delete { width:30px; height:30px; flex:0 0 30px; border:0; border-radius:8px; background:transparent; color:#9a6670; }
+.ai-chat-delete:hover { background:#3a2027; color:#fff; }
+.app-shell.light-theme .ai-chat-delete { color:#a35d68; }
+.app-shell.light-theme .ai-chat-delete:hover { background:#fbecee; color:#8f2f3d; }
 .app-shell.light-theme .ai-card { background:#fff; border-color:#e1e4eb; box-shadow:0 8px 28px rgba(32,42,64,.05); }
 .app-shell.light-theme .ai-empty { color:#687184; }
 .app-shell.light-theme .ai-empty strong { color:#1d2433; }
@@ -589,13 +518,24 @@ button:not(:disabled):hover { transform:translateY(-1px); }
 .app-shell.light-theme .progress-track { background:#e5e8ef; }
 .app-shell.light-theme .bar-item span { color:#667085; }
 .app-shell.light-theme .bar-item small { color:#8a93a4; }
-.app-shell.light-theme .track-row { color:#263044; }
-.app-shell.light-theme .track-details strong { color:#263044; }
-.app-shell.light-theme .track-details small { color:#7b8495; }
-.app-shell.light-theme .track-row:not(.active) .track-play { color:#667085; }
 
 @media (max-width:700px) {
   .ai-layout { grid-template-columns:1fr; }
   .ai-sidebar { min-height:0; }
   .ai-chat-list { max-height:190px; overflow-y:auto; }
+}
+
+/* Final light-mode input visibility fixes */
+.app-shell.light-theme input,
+.app-shell.light-theme textarea,
+.app-shell.light-theme select {
+  color: #1d2433 !important;
+  -webkit-text-fill-color: #1d2433 !important;
+  background: #fff !important;
+  border-color: #dfe3eb !important;
+}
+.app-shell.light-theme input::placeholder,
+.app-shell.light-theme textarea::placeholder {
+  color: #8a93a4 !important;
+  -webkit-text-fill-color: #8a93a4 !important;
 }

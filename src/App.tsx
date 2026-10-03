@@ -2,113 +2,6 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { supabase } from "./supabase";
 
 
-declare global {
-  interface Window {
-    YT?: any;
-    onYouTubeIframeAPIReady?: () => void;
-  }
-}
-
-type Tab = "calendar" | "timer" | "music" | "stats" | "ai" | "settings";
-
-type MusicTrack = {
-  title: string;
-  artist: string;
-  youtubeId: string;
-};
-
-const musicTracks: MusicTrack[] = [
-  { title: "2002", artist: "Anne-Marie", youtubeId: "vZofi2hgiAE" },
-  { title: "Oh yeah?", artist: "Steve Lacy", youtubeId: "hneQZu3VGCs" },
-  { title: "Legends Never Die", artist: "Against The Current", youtubeId: "k8CAY6yqDdA" },
-  { title: "Memories", artist: "Maroon 5", youtubeId: "SlPhMPnQ58k" },
-  { title: "Stereo Hearts", artist: "Gym Class Heroes feat. Adam Levine", youtubeId: "odAToCo9Blg" },
-  { title: "Someone You Loved", artist: "Lewis Capaldi", youtubeId: "6mTYd_CaUdE" },
-  { title: "toxic till the end", artist: "ROSÉ", youtubeId: "wCFVFdhJdCo" },
-  { title: "Beautiful Things", artist: "Benson Boone", youtubeId: "iqiQtNKX8M0" },
-  { title: "Love Is Gone (Acoustic)", artist: "SLANDER", youtubeId: "34Tmi7gVzcE" },
-  { title: "Dangerously", artist: "Charlie Puth", youtubeId: "3ERtNZqh1XA" },
-  { title: "High Hopes", artist: "Panic! At The Disco", youtubeId: "0V3LwNtZxM4" },
-  { title: "Unstoppable", artist: "Sia", youtubeId: "kIjUfXfJjGU" },
-];
-
-let youtubeApiPromise: Promise<any> | null = null;
-
-function loadYouTubeApi() {
-  if (window.YT?.Player) return Promise.resolve(window.YT);
-  if (youtubeApiPromise) return youtubeApiPromise;
-  youtubeApiPromise = new Promise((resolve) => {
-    const existing = document.getElementById("youtube-iframe-api");
-    const finish = () => resolve(window.YT);
-    if (existing) {
-      const check = window.setInterval(() => {
-        if (window.YT?.Player) { window.clearInterval(check); finish(); }
-      }, 50);
-      return;
-    }
-    const script = document.createElement("script");
-    script.id = "youtube-iframe-api";
-    script.src = "https://www.youtube.com/iframe_api";
-    document.head.appendChild(script);
-    const previous = window.onYouTubeIframeAPIReady;
-    window.onYouTubeIframeAPIReady = () => {
-      previous?.();
-      finish();
-    };
-  });
-  return youtubeApiPromise;
-}
-
-function YouTubePlayer({ videoId, autoplay, onEnded }: { videoId: string; autoplay: boolean; onEnded: () => void }) {
-  const hostRef = useRef<HTMLDivElement | null>(null);
-  const playerRef = useRef<any>(null);
-  const onEndedRef = useRef(onEnded);
-  const initialVideoIdRef = useRef(videoId);
-  onEndedRef.current = onEnded;
-
-  // Create ONE YouTube player and keep it alive while the app switches tabs/tracks.
-  // This is important for reliable automatic next-track playback.
-  useEffect(() => {
-    let cancelled = false;
-    loadYouTubeApi().then((YT) => {
-      if (cancelled || !hostRef.current || !YT?.Player || playerRef.current) return;
-      playerRef.current = new YT.Player(hostRef.current, {
-        videoId: initialVideoIdRef.current,
-        playerVars: { controls: 1, rel: 0, playsinline: 1, modestbranding: 1, autoplay: 0 },
-        events: {
-          onStateChange: (event: any) => {
-            if (event.data === YT.PlayerState.ENDED) onEndedRef.current();
-          },
-        },
-      });
-    });
-    return () => {
-      cancelled = true;
-      playerRef.current?.destroy?.();
-      playerRef.current = null;
-    };
-  }, []);
-
-  // Change the video inside the same player instead of destroying/recreating the iframe.
-  // loadVideoById keeps the playback context alive when the user is on another tab.
-  useEffect(() => {
-    const player = playerRef.current;
-    if (!player?.loadVideoById) return;
-    if (autoplay) {
-      player.loadVideoById(videoId);
-    } else {
-      player.cueVideoById?.(videoId);
-    }
-  }, [videoId]);
-
-  useEffect(() => {
-    if (!autoplay || !playerRef.current?.playVideo) return;
-    playerRef.current.playVideo();
-  }, [autoplay, videoId]);
-
-  return <div ref={hostRef} className="youtube-player-host" />;
-}
-
 type StudyRecord = {
   id: string;
   date: string;
@@ -403,9 +296,6 @@ function App() {
   const [aiInput, setAiInput] = useState("");
   const [aiLoading, setAiLoading] = useState(false);
   const [aiError, setAiError] = useState("");
-  const [selectedTrackIndex, setSelectedTrackIndex] = useState(0);
-  const [autoplayTrack, setAutoplayTrack] = useState(false);
-  const selectedTrackIndexRef = useRef(0);
 
   useEffect(() => {
     const id = window.setInterval(() => setNow(new Date()), 1000);
@@ -488,10 +378,6 @@ function App() {
     return () => window.clearInterval(id);
   }, [running, timerStartedAt, pausedElapsed]);
 
-  useEffect(() => {
-    selectedTrackIndexRef.current = selectedTrackIndex;
-  }, [selectedTrackIndex]);
-
   const calendarCells = useMemo(
     () => getMonthDays(viewDate.getFullYear(), viewDate.getMonth()),
     [viewDate]
@@ -556,7 +442,7 @@ function App() {
     const chat = aiChats.find(c => c.id === activeAiChatId);
     if (!chat) return;
     const nextMessages: AiMessage[] = [...chat.messages, { role: "user", content: message }];
-    setAiChats(prev => prev.map(c => c.id === chat.id ? { ...c, messages: nextMessages, title: c.messages.length === 0 ? message.slice(0, 24) : c.title } : c));
+    setAiChats(prev => prev.map(c => c.id === chat.id ? { ...c, messages: nextMessages } : c));
     setAiInput("");
     setAiError("");
     setAiLoading(true);
@@ -567,8 +453,10 @@ function App() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ messages: nextMessages }),
       });
-      const data = await response.json().catch(() => ({}));
-      if (!response.ok) throw new Error(data?.error || "AI 호출에 실패했습니다.");
+      const raw = await response.text();
+      let data: any = {};
+      try { data = raw ? JSON.parse(raw) : {}; } catch { data = { error: raw.slice(0, 800) }; }
+      if (!response.ok) throw new Error(data?.error || `AI 호출에 실패했습니다. (${response.status})`);
       if (!data?.answer) throw new Error("AI가 답변을 반환하지 않았습니다.");
       setAiChats(prev => prev.map(c => c.id === chat.id ? { ...c, messages: [...nextMessages, { role: "assistant", content: String(data.answer) }] } : c));
     } catch (error) {
@@ -594,6 +482,25 @@ function App() {
     const title = nextTitle.trim().slice(0, 40);
     if (!title) return;
     setAiChats(prev => prev.map(c => c.id === id ? { ...c, title } : c));
+  }
+
+  function deleteAiChat(id: string) {
+    const chat = aiChats.find(c => c.id === id);
+    if (!chat) return;
+    if (!window.confirm(`"${chat.title}" 대화를 삭제할까요?`)) return;
+    const remaining = aiChats.filter(c => c.id !== id);
+    if (remaining.length === 0) {
+      const nextChat: AiChat = { id: crypto.randomUUID(), title: "새 대화", messages: [] };
+      setAiChats([nextChat]);
+      setActiveAiChatId(nextChat.id);
+    } else {
+      setAiChats(remaining);
+      if (activeAiChatId === id) {
+        setActiveAiChatId(remaining[0].id);
+        setAiInput("");
+        setAiError("");
+      }
+    }
   }
 
 
@@ -671,12 +578,6 @@ function App() {
     setRecords((prev) => prev.filter((record) => record.id !== id));
   }
 
-  function selectTrack(index: number) {
-    selectedTrackIndexRef.current = index;
-    setSelectedTrackIndex(index);
-    setAutoplayTrack(true);
-  }
-
   const currentMinutes = timerMode === "focus" ? focusMinutes : breakMinutes;
   const currentLength = currentMinutes * 60;
   const timerRemaining = Math.max(0, currentLength - sessionElapsed);
@@ -717,7 +618,7 @@ function App() {
         <div className="topbar-actions"><span className="active-profile-name">{activeProfile.name}</span><button className="logout-button" onClick={logOutProfile}>프로필 변경</button><div className="live-clock">{formatClock(now)}</div></div>
       </header>
 
-      <main className={`content ${tab === "music" ? "music-content" : ""}`}>
+      <main className="content">
         {tab === "calendar" && (
           <section>
             <div className="page-heading">
@@ -854,66 +755,6 @@ function App() {
           </section>
         )}
 
-        {(() => {
-          const track = musicTracks[selectedTrackIndex];
-          return (
-            <section className={`music-page ${tab === "music" ? "" : "music-background-player"}`} aria-hidden={tab !== "music"}>
-              <div className="page-heading">
-                <div>
-                  <p className="eyebrow">STUDY PLAYLIST</p>
-                  <h1>음악</h1>
-                </div>
-                <span className="track-count">12곡</span>
-              </div>
-
-              <div className="music-player-card">
-                <div className="now-playing">
-                  <span className="playing-label">NOW PLAYING</span>
-                  <h2>{track.title}</h2>
-                  <p>{track.artist}</p>
-                </div>
-                <div className="youtube-frame">
-                  <YouTubePlayer
-                    videoId={track.youtubeId}
-                    autoplay={autoplayTrack}
-                    onEnded={() => {
-                      const nextIndex = (selectedTrackIndexRef.current + 1) % musicTracks.length;
-                      selectedTrackIndexRef.current = nextIndex;
-                      setSelectedTrackIndex(nextIndex);
-                      setAutoplayTrack(true);
-                    }}
-                  />
-                </div>
-                <div className="music-controls">
-                  <span>🔊 음량과 재생은 YouTube 플레이어에서 조절할 수 있어.</span>
-                </div>
-                <p className="music-note">다른 탭으로 이동해도 음악은 계속 재생됩니다.</p>
-              </div>
-
-              <div className="playlist-card">
-                <div className="playlist-heading">
-                  <div><p className="eyebrow">MY PLAYLIST</p><h2>공부할 때 듣는 음악</h2></div>
-                  <span>{selectedTrackIndex + 1} / {musicTracks.length}</span>
-                </div>
-                <div className="track-list">
-                  {musicTracks.map((item, index) => (
-                    <button
-                      key={item.youtubeId}
-                      className={`track-row ${index === selectedTrackIndex ? "active" : ""}`}
-                      onClick={() => selectTrack(index)}
-                      aria-label={`${item.artist} ${item.title} 재생`}
-                    >
-                      <span className="track-number">{String(index + 1).padStart(2, "0")}</span>
-                      <span className="track-details"><strong>{item.title}</strong><small>{item.artist}</small></span>
-                      <span className="track-play">{index === selectedTrackIndex ? "재생 중" : "▶"}</span>
-                    </button>
-                  ))}
-                </div>
-              </div>
-            </section>
-          );
-        })()}
-
         {tab === "stats" && (
           <section>
             <div className="page-heading">
@@ -1008,6 +849,7 @@ function App() {
                         <span>{chat.messages.length ? `${chat.messages.length}개 메시지` : "새 대화"}</span>
                       </button>
                       <button className="ai-chat-rename" onClick={() => renameAiChat(chat.id)} aria-label="대화 이름 변경">✎</button>
+                      <button className="ai-chat-delete" onClick={() => deleteAiChat(chat.id)} aria-label="대화 삭제">×</button>
                     </div>
                   ))}
                 </div>
@@ -1108,7 +950,6 @@ function App() {
       <nav className="bottom-nav">
         <button className={tab === "calendar" ? "active" : ""} onClick={() => setTab("calendar")}><span>▦</span>캘린더</button>
         <button className={tab === "timer" ? "active" : ""} onClick={() => setTab("timer")}><span>◷</span>타이머</button>
-        <button className={tab === "music" ? "active" : ""} onClick={() => setTab("music")}><span>♫</span>음악</button>
         <button className={tab === "stats" ? "active" : ""} onClick={() => setTab("stats")}><span>▥</span>통계</button>
         <button className={tab === "ai" ? "active" : ""} onClick={() => setTab("ai")}><span>✦</span>AI</button>
         <button className={tab === "settings" ? "active" : ""} onClick={() => setTab("settings")}><span>⚙</span>설정</button>
