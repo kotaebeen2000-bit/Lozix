@@ -120,6 +120,8 @@ type StudyRecord = {
 
 type Profile = { id: string; name: string };
 type ActiveProfile = Profile & { pin: string };
+type AiMessage = { role: "user" | "assistant"; content: string };
+type AiChat = { id: string; title: string; messages: AiMessage[] };
 
 function readStudyGoal(key: string) {
   const n = Number(localStorage.getItem(key) || 0);
@@ -396,7 +398,8 @@ function App() {
   const [pinMessage, setPinMessage] = useState("");
   const [timerLengthDraft, setTimerLengthDraft] = useState("25");
   const [selectedChartDate, setSelectedChartDate] = useState<string | null>(null);
-  const [aiMessages, setAiMessages] = useState<{ role: "user" | "assistant"; content: string }[]>([]);
+  const [aiChats, setAiChats] = useState<AiChat[]>([]);
+  const [activeAiChatId, setActiveAiChatId] = useState<string | null>(null);
   const [aiInput, setAiInput] = useState("");
   const [aiLoading, setAiLoading] = useState(false);
   const [aiError, setAiError] = useState("");
@@ -416,6 +419,35 @@ function App() {
   useEffect(() => {
     localStorage.setItem("lozix-theme", theme);
   }, [theme]);
+
+  useEffect(() => {
+    if (!activeProfile) {
+      setAiChats([]);
+      setActiveAiChatId(null);
+      return;
+    }
+    try {
+      const raw = localStorage.getItem(`lozix-ai-chats-${activeProfile.id}`);
+      const saved = raw ? JSON.parse(raw) : [];
+      if (Array.isArray(saved) && saved.length > 0) {
+        setAiChats(saved);
+        setActiveAiChatId(saved[0].id);
+      } else {
+        const chat: AiChat = { id: crypto.randomUUID(), title: "새 대화", messages: [] };
+        setAiChats([chat]);
+        setActiveAiChatId(chat.id);
+      }
+    } catch {
+      const chat: AiChat = { id: crypto.randomUUID(), title: "새 대화", messages: [] };
+      setAiChats([chat]);
+      setActiveAiChatId(chat.id);
+    }
+  }, [activeProfile?.id]);
+
+  useEffect(() => {
+    if (!activeProfile || aiChats.length === 0) return;
+    localStorage.setItem(`lozix-ai-chats-${activeProfile.id}`, JSON.stringify(aiChats));
+  }, [activeProfile?.id, aiChats]);
 
   useEffect(() => {
     if (!activeProfile) return;
@@ -502,7 +534,7 @@ function App() {
 
   async function createProfile() {
     const name = profileName.trim();
-    if (!name || !/^\d{4}$/.test(profilePin)) { setProfileMessage("이름과 숫자 4자리 PIN을 입력하세요."); return; }
+    if (!name || !/^\d{4,8}$/.test(profilePin)) { setProfileMessage("이름과 숫자 4~8자리 PIN을 입력하세요."); return; }
     setProfileMessage("프로필을 만드는 중입니다…");
     const { data, error } = await supabase.rpc("create_lozix_profile", { profile_name: name, profile_pin: profilePin });
     if (error || !data) {
@@ -521,8 +553,10 @@ function App() {
     const message = aiInput.trim();
     if (!message || aiLoading) return;
 
-    const nextMessages = [...aiMessages, { role: "user" as const, content: message }];
-    setAiMessages(nextMessages);
+    const chat = aiChats.find(c => c.id === activeAiChatId);
+    if (!chat) return;
+    const nextMessages: AiMessage[] = [...chat.messages, { role: "user", content: message }];
+    setAiChats(prev => prev.map(c => c.id === chat.id ? { ...c, messages: nextMessages, title: c.messages.length === 0 ? message.slice(0, 24) : c.title } : c));
     setAiInput("");
     setAiError("");
     setAiLoading(true);
@@ -536,13 +570,32 @@ function App() {
       const data = await response.json().catch(() => ({}));
       if (!response.ok) throw new Error(data?.error || "AI 호출에 실패했습니다.");
       if (!data?.answer) throw new Error("AI가 답변을 반환하지 않았습니다.");
-      setAiMessages(prev => [...prev, { role: "assistant", content: String(data.answer) }]);
+      setAiChats(prev => prev.map(c => c.id === chat.id ? { ...c, messages: [...nextMessages, { role: "assistant", content: String(data.answer) }] } : c));
     } catch (error) {
       setAiError(error instanceof Error ? error.message : "AI 호출에 실패했습니다.");
     } finally {
       setAiLoading(false);
     }
   }
+
+  function createAiChat() {
+    const chat: AiChat = { id: crypto.randomUUID(), title: "새 대화", messages: [] };
+    setAiChats(prev => [chat, ...prev]);
+    setActiveAiChatId(chat.id);
+    setAiInput("");
+    setAiError("");
+  }
+
+  function renameAiChat(id: string) {
+    const chat = aiChats.find(c => c.id === id);
+    if (!chat) return;
+    const nextTitle = window.prompt("대화 이름을 입력하세요.", chat.title);
+    if (nextTitle === null) return;
+    const title = nextTitle.trim().slice(0, 40);
+    if (!title) return;
+    setAiChats(prev => prev.map(c => c.id === id ? { ...c, title } : c));
+  }
+
 
   async function changePin() {
     if (!activeProfile) return;
@@ -566,6 +619,8 @@ function App() {
     setRecords([]);
     setGoals([]);
     setProfilePin("");
+    setAiChats([]);
+    setActiveAiChatId(null);
     setProfileMessage("프로필을 선택하거나 새로 만드세요.");
     refreshProfiles();
   }
@@ -638,15 +693,15 @@ function App() {
           <h1>프로필 선택</h1>
           <p className="profile-help">프로필마다 학습 기록과 목표가 따로 저장됩니다.</p>
           <div className="profile-list">
-            {profilesLoading ? <span>프로필을 불러오는 중…</span> : profiles.length === 0 ? <span>아직 만들어진 프로필이 없습니다.</span> : profiles.map(profile => <button key={profile.id} className={profileName === profile.name ? "selected" : ""} onClick={() => { setProfileName(profile.name); setProfileMessage("숫자 4자리 PIN을 입력하세요."); }}>{profile.name}</button>)}
+            {profilesLoading ? <span>프로필을 불러오는 중…</span> : profiles.length === 0 ? <span>아직 만들어진 프로필이 없습니다.</span> : profiles.map(profile => <button key={profile.id} className={profileName === profile.name ? "selected" : ""} onClick={() => { setProfileName(profile.name); setProfileMessage("숫자 4~8자리 PIN을 입력하세요."); }}>{profile.name}</button>)}
           </div>
           <div className="profile-form">
             <label>프로필 이름<input maxLength={24} value={profileName} onChange={e => setProfileName(e.target.value)} placeholder="예: 민준" /></label>
-            <label>4자리 PIN<input inputMode="numeric" type="password" maxLength={4} value={profilePin} onChange={e => setProfilePin(e.target.value.replace(/\D/g, ""))} placeholder="••••" /></label>
+            <label>PIN 4~8자리<input inputMode="numeric" type="password" maxLength={8} value={profilePin} onChange={e => setProfilePin(e.target.value.replace(/\D/g, ""))} placeholder="••••" /></label>
           </div>
           <p className="profile-message" role="status">{profileMessage}</p>
           <div className="profile-actions"><button className="secondary" onClick={openProfile}>프로필 열기</button><button className="primary" onClick={createProfile}>새 프로필 만들기</button></div>
-          <p className="profile-footnote">최대 10개 · 이름과 PIN은 다른 기기에서도 사용할 수 있어요.</p>
+          <p className="profile-footnote">최대 10개 · 이름과 4~8자리 숫자 PIN은 다른 기기에서도 사용할 수 있어요.</p>
         </div>
       </div>
     );
@@ -939,15 +994,34 @@ function App() {
               <div><p className="eyebrow">AI STUDY HELPER</p><h1>AI 공부 도우미</h1></div>
             </div>
 
-            <div className="ai-card">
+            <div className="ai-layout">
+              <aside className="ai-sidebar">
+                <div className="ai-sidebar-header">
+                  <strong>대화 목록</strong>
+                  <button className="secondary" onClick={createAiChat}>+ 새 대화</button>
+                </div>
+                <div className="ai-chat-list">
+                  {aiChats.map(chat => (
+                    <div className={`ai-chat-item ${chat.id === activeAiChatId ? "active" : ""}`} key={chat.id}>
+                      <button className="ai-chat-select" onClick={() => { setActiveAiChatId(chat.id); setAiError(""); }}>
+                        <strong>{chat.title}</strong>
+                        <span>{chat.messages.length ? `${chat.messages.length}개 메시지` : "새 대화"}</span>
+                      </button>
+                      <button className="ai-chat-rename" onClick={() => renameAiChat(chat.id)} aria-label="대화 이름 변경">✎</button>
+                    </div>
+                  ))}
+                </div>
+              </aside>
+
+              <div className="ai-card">
               <div className="ai-messages">
-                {aiMessages.length === 0 ? (
+                {!(aiChats.find(c => c.id === activeAiChatId)?.messages.length) ? (
                   <div className="ai-empty">
                     <strong>공부하다 궁금한 것을 물어보세요.</strong>
                     <span>개념 설명, 문제 풀이, 영어 문법, 한국사 등 학습 질문을 도와줄게요.</span>
                   </div>
                 ) : (
-                  aiMessages.map((message, index) => (
+                  (aiChats.find(c => c.id === activeAiChatId)?.messages ?? []).map((message, index) => (
                     <div className={`ai-message ${message.role}`} key={`${message.role}-${index}`}>
                       <span className="ai-message-label">{message.role === "user" ? "나" : "AI"}</span>
                       <div className="ai-message-content">{message.content}</div>
@@ -982,6 +1056,7 @@ function App() {
               </div>
               {aiError && <p className="ai-error" role="alert">{aiError}</p>}
               <p className="ai-note">Enter는 줄바꿈 · Ctrl+Enter로 질문 보내기</p>
+              </div>
             </div>
           </section>
         )}

@@ -47,8 +47,8 @@ begin
   if profile_name is null or char_length(trim(profile_name)) not between 1 and 24 then
     raise exception '프로필 이름은 1~24자로 입력하세요.';
   end if;
-  if profile_pin is null or profile_pin !~ '^[0-9]{4}$' then
-    raise exception 'PIN은 숫자 4자리여야 합니다.';
+  if profile_pin is null or profile_pin !~ '^[0-9]{4,8}$' then
+    raise exception 'PIN은 숫자 4~8자리여야 합니다.';
   end if;
   if (select count(*) from public.lozix_profiles) >= 10 then
     raise exception '프로필은 최대 10개까지 만들 수 있습니다.';

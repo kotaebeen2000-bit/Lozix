@@ -138,7 +138,7 @@ h2 { margin:0; font-size:20px; letter-spacing:-.03em; }
 }
 
 /* v1.1 dark + goals + circular timer */
-body{background:#080a0f}.app-shell{background:radial-gradient(circle at 50% -10%,#171b29 0,#080a0f 42%);color:#eceef5}.topbar{background:rgba(10,12,18,.88);border-color:#202431}.calendar-card,.records-card,.goal-card,.chart-card,.timer-note,.session-info{background:#11141b;border-color:#242936}.day{background:#11141b;border-color:#20242f;color:#d7dbea}.day.empty{background:#0e1016}.day:hover{background:#171b25}.day.selected{background:#171d31}.month-nav button{background:#11141c;color:#dce1ed;border-color:#292e3b}.goal-card{padding:22px;margin-bottom:18px}.card-heading{display:flex;justify-content:space-between;align-items:center;gap:14px}.muted{font-size:11px;color:#727b8e}.goal-add{display:grid;grid-template-columns:1fr 100px 24px auto;align-items:center;gap:8px;margin:18px 0}.goal-add input,.goal-row input{border:1px solid #2a3040;outline:0;background:#0b0e14;color:#e9ecf5;border-radius:10px;padding:10px 11px}.minutes-input{text-align:center}.unit{font-size:12px;color:#7e879a}.goal-row{padding:17px 0;border-top:1px solid #242936}.goal-top{display:flex;justify-content:space-between;align-items:center;gap:12px}.goal-top>input{flex:1;background:transparent;font-weight:800}.goal-target{display:flex;align-items:center;gap:6px;color:#7e879b;font-size:11px}.goal-target input{width:70px;text-align:center;padding:7px}.progress-track{height:8px;background:#252b38;border-radius:99px;overflow:hidden;margin:13px 0 8px}.progress-fill{height:100%;border-radius:99px;background:linear-gradient(90deg,#647cf0,#9b86f6);transition:width .25s}.goal-bottom{display:flex;align-items:center;gap:12px;color:#858ea1;font-size:11px}.goal-bottom strong{color:#bfc7ff;margin-left:auto}.goal-badge{display:block;margin-top:7px;font-size:9px;color:#aeb8ff;font-weight:800}.primary{background:#657bf0}.secondary{background:#242a37;color:#d0d5e2}.pomodoro-wrap{position:relative;width:340px;height:340px;margin:0 auto 28px;display:grid;place-items:center}.pomodoro{background:conic-gradient(#7186f0 var(--progress),#252a37 var(--progress));box-shadow:0 0 60px rgba(92,112,231,.08)}.pomodoro::before{background:#0e1118;border-color:#252b38}.bottom-nav{background:rgba(15,18,25,.94);border-color:#2a3040;box-shadow:0 10px 32px rgba(0,0,0,.4)}.bottom-nav button.active{background:#202747;color:#aab6ff}@media(max-width:700px){.goal-add{grid-template-columns:1fr 75px 20px}.goal-add .primary{grid-column:1/-1}.goal-top{align-items:flex-start;flex-direction:column}.goal-target{align-self:flex-end}.pomodoro-wrap{width:290px;height:290px}.pomodoro{width:270px;height:270px}@keyframes orbitMobile{from{transform:rotate(0deg) translateY(-128px)}to{transform:rotate(360deg) translateY(-128px)}}}
+body{background:#080a0f}.app-shell{background:radial-gradient(circle at 50% -10%,#171b29 0,#080a0f 42%);color:#eceef5}.topbar{background:rgba(10,12,18,.88);border-color:#202431}.calendar-card,.records-card,.goal-card,.chart-card,.timer-note,.session-info{background:#11141b;border-color:#242936}.day{background:#11141b;border-color:#20242f;color:#d7dbea}.day.empty{background:#0e1016}.day:hover{background:#171b25}.day.selected{background:#171d31}.month-nav button{background:#11141c;color:#dce1ed;border-color:#292e3b}.goal-card{padding:22px;margin-bottom:18px}.card-heading{display:flex;justify-content:space-between;align-items:center;gap:14px}.muted{font-size:11px;color:#727b8e}.goal-add{display:grid;grid-template-columns:1fr 100px 24px auto;align-items:center;gap:8px;margin:18px 0}.goal-add input,.goal-row input{border:1px solid #2a3040;outline:0;background:#0b0e14;color:#e9ecf5;border-radius:10px;padding:10px 11px}.minutes-input{text-align:center}.unit{font-size:12px;color:#7e879a}.goal-row{padding:17px 0;border-top:1px solid #242936}.goal-top{display:flex;justify-content:space-between;align-items:center;gap:12px}.goal-top>input{flex:1;background:transparent;font-weight:800}.goal-target{display:flex;align-items:center;gap:6px;color:#7e879b;font-size:11px}.goal-target input{width:70px;text-align:center;padding:7px}.progress-track{height:8px;background:#252b38;border-radius:99px;overflow:hidden;margin:13px 0 8px}.progress-fill{height:100%;border-radius:99px;background:linear-gradient(90deg,#647cf0,#9b86f6);transition:width .25s}.goal-bottom{display:flex;align-items:center;gap:12px;color:#858ea1;font-size:11px}.goal-bottom strong{color:#bfc7ff;margin-left:auto}.goal-badge{display:block;margin-top:7px;font-size:9px;color:#aeb8ff;font-weight:800}.primary{background:#657bf0}.secondary{background:#242a37;color:#d0d5e2}.pomodoro-wrap{position:relative;width:340px;height:340px;margin:0 auto 28px;display:grid;place-items:center}.pomodoro{background:conic-gradient(#7186f0 var(--progress),#252a37 var(--progress));box-shadow:0 0 60px rgba(92,112,231,.08)}.pomodoro::before{background:#0e1118;border-color:#252b38}.bottom-nav{background:rgba(15,18,25,.94);border-color:#2a3040;box-shadow:0 10px 32px rgba(0,0,0,.4)}.bottom-nav button.active{background:#202747;color:#aab6ff}@media(max-width:700px){.goal-add{grid-template-columns:1fr 75px 20px}.goal-add .primary{grid-column:1/-1}.goal-top{align-items:flex-start;flex-direction:column}.goal-target{align-self:flex-end}.pomodoro-wrap{width:290px;height:290px}.pomodoro{width:270px;height:270px}}
 
 /* v1.2 refinements */
 .name-input::placeholder,.goal-add input::placeholder{color:#626a7b;opacity:1}
@@ -206,7 +206,7 @@ button { color: #fff; }
 .day .goal-badge { color: #bfc8ff !important; }
 
 /* v4 holiday marker */
-.holiday{color:#ff7f91 !important}.day .holiday{display:block;font-size:9px;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.day:has(.holiday){ }
+.holiday{color:#ff7f91 !important}.day .holiday{display:block;font-size:9px;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 
 
 /* v5 smooth interaction polish */
@@ -397,14 +397,6 @@ button:not(:disabled):hover { transform:translateY(-1px); }
 }
 
 
-@media (max-width:700px) {
-  @keyframes lozixOrbit2sMobile {
-    from { transform: rotate(0deg) translateY(-130px) !important; }
-    to   { transform: rotate(360deg) translateY(-130px) !important; }
-  }
-  
-}
-
 
 /* =========================================================
    LOZIX TIMER ORBIT — EXACT POMODORO RING PATH
@@ -434,12 +426,12 @@ button:not(:disabled):hover { transform:translateY(-1px); }
   from { transform:rotate(0deg) translateY(-155px); }
   to   { transform:rotate(360deg) translateY(-155px); }
 }
+@keyframes lozixExactOrbitMobile {
+  from { transform:rotate(0deg) translateY(-130px); }
+  to   { transform:rotate(360deg) translateY(-130px); }
+}
 @media (max-width:700px) {
   .orbit-dot { animation-name:lozixExactOrbitMobile !important; }
-  @keyframes lozixExactOrbitMobile {
-    from { transform:rotate(0deg) translateY(-130px); }
-    to   { transform:rotate(360deg) translateY(-130px); }
-  }
 }
 
 /* Statistics controls */
@@ -510,6 +502,16 @@ button:not(:disabled):hover { transform:translateY(-1px); }
 .app-shell.light-theme .bottom-nav button.active { background:#eef1ff; color:#5269cb; }
 .app-shell.light-theme .stat-cards span { color:#9097a7; }
 
+/* Light theme readability for shared form controls */
+.app-shell.light-theme .name-input { background:#fff !important; color:#1d2433 !important; -webkit-text-fill-color:#1d2433; border-color:#dfe3eb !important; }
+.app-shell.light-theme .name-input::placeholder { color:#8a93a4 !important; -webkit-text-fill-color:#8a93a4; }
+.app-shell.light-theme .chart-detail { background:#f0f2f6; color:#4b5568; }
+.app-shell.light-theme .chart-detail span { color:#344054; }
+.app-shell.light-theme .timer-note, .app-shell.light-theme .session-info { color:#5f687a; }
+.app-shell.light-theme .session-info strong { color:#273043; }
+.app-shell.light-theme .eyebrow { color:#667085 !important; }
+.app-shell.light-theme .goal-bottom strong, .app-shell.light-theme .goal-badge { color:#5269cb !important; }
+
 @media (max-width:700px) {
   .pin-form { grid-template-columns:1fr; }
   .settings-row { align-items:flex-start; }
@@ -540,4 +542,60 @@ button:not(:disabled):hover { transform:translateY(-1px); }
   .ai-message { max-width:92%; }
   .ai-input-row { flex-direction:column; }
   .ai-input-row button { min-height:48px; }
+}
+
+
+/* Requested: AI chat list + readable light/dark themes */
+.ai-layout { display:grid; grid-template-columns:260px minmax(0,1fr); gap:14px; align-items:stretch; }
+.ai-sidebar { background:#11141b; border:1px solid #242936; border-radius:20px; padding:12px; min-height:520px; }
+.ai-sidebar-header { display:flex; align-items:center; justify-content:space-between; gap:8px; padding:4px 4px 12px; }
+.ai-sidebar-header strong { color:#f4f6fa; font-size:14px; }
+.ai-sidebar-header .secondary { padding:8px 10px; font-size:11px; background:#202532; color:#eef1f7; }
+.ai-chat-list { display:flex; flex-direction:column; gap:6px; }
+.ai-chat-item { display:flex; align-items:center; gap:4px; border:1px solid transparent; border-radius:12px; padding:3px; }
+.ai-chat-item.active { background:#1c2332; border-color:#30394d; }
+.ai-chat-select { flex:1; min-width:0; border:0; background:transparent; color:#e9edf5; text-align:left; padding:8px; border-radius:9px; display:flex; flex-direction:column; gap:3px; }
+.ai-chat-select strong { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-size:12px; }
+.ai-chat-select span { color:#80899a; font-size:10px; }
+.ai-chat-rename { width:30px; height:30px; flex:0 0 30px; border:0; border-radius:8px; background:transparent; color:#8e98aa; }
+.ai-chat-rename:hover { background:#2a3140; color:#fff; }
+.ai-page .ai-card { min-width:0; }
+
+/* Light mode: explicitly override AI and common controls so every surface stays readable. */
+.app-shell.light-theme .ai-sidebar { background:#fff; border-color:#e1e4eb; box-shadow:0 8px 28px rgba(32,42,64,.05); }
+.app-shell.light-theme .ai-sidebar-header strong { color:#1d2433; }
+.app-shell.light-theme .ai-sidebar-header .secondary { background:#eef1f7; color:#3d4658; }
+.app-shell.light-theme .ai-chat-item.active { background:#eef1ff; border-color:#d7def6; }
+.app-shell.light-theme .ai-chat-select { color:#263044; }
+.app-shell.light-theme .ai-chat-select span { color:#7b8495; }
+.app-shell.light-theme .ai-chat-rename { color:#667085; }
+.app-shell.light-theme .ai-chat-rename:hover { background:#e9edf5; color:#344054; }
+.app-shell.light-theme .ai-card { background:#fff; border-color:#e1e4eb; box-shadow:0 8px 28px rgba(32,42,64,.05); }
+.app-shell.light-theme .ai-empty { color:#687184; }
+.app-shell.light-theme .ai-empty strong { color:#1d2433; }
+.app-shell.light-theme .ai-message-label { color:#667085; }
+.app-shell.light-theme .ai-message-content { background:#f0f2f6; color:#273043; }
+.app-shell.light-theme .ai-message.user .ai-message-content { background:#e8eefc; color:#26345a; }
+.app-shell.light-theme .ai-input-row textarea { background:#fff; color:#1d2433; border-color:#d7dce5; }
+.app-shell.light-theme .ai-input-row textarea::placeholder { color:#8a93a4; }
+.app-shell.light-theme .ai-note { color:#70798b; }
+.app-shell.light-theme .ai-error { color:#c93636; }
+.app-shell.light-theme .secondary { color:#3d4658; }
+.app-shell.light-theme .text-button { color:#6f7788; }
+.app-shell.light-theme .record-main input { color:#273043; }
+.app-shell.light-theme .record-main span, .app-shell.light-theme .empty-state, .app-shell.light-theme .muted { color:#7b8495; }
+.app-shell.light-theme .goal-add input, .app-shell.light-theme .goal-row input { background:#fff; color:#1d2433; border-color:#dfe3eb; }
+.app-shell.light-theme .goal-target, .app-shell.light-theme .unit { color:#727c8f; }
+.app-shell.light-theme .progress-track { background:#e5e8ef; }
+.app-shell.light-theme .bar-item span { color:#667085; }
+.app-shell.light-theme .bar-item small { color:#8a93a4; }
+.app-shell.light-theme .track-row { color:#263044; }
+.app-shell.light-theme .track-details strong { color:#263044; }
+.app-shell.light-theme .track-details small { color:#7b8495; }
+.app-shell.light-theme .track-row:not(.active) .track-play { color:#667085; }
+
+@media (max-width:700px) {
+  .ai-layout { grid-template-columns:1fr; }
+  .ai-sidebar { min-height:0; }
+  .ai-chat-list { max-height:190px; overflow-y:auto; }
 }
