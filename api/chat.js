@@ -1,5 +1,6 @@
 const GEMINI_MODEL = "gemini-3.8-flash";
-const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent`;
+const GEMINI_FALLBACK_MODEL = "gemini-3.6-flash";
+const GEMINI_URL = (model) => `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`;
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -64,28 +65,35 @@ async function handlePost(request) {
   }
 
   try {
-    const response = await fetch(GEMINI_URL, {
+    const requestBody = JSON.stringify({
+      systemInstruction: {
+        parts: [
+          {
+            text: "너는 Lozix의 AI 공부 도우미다. 학생의 질문을 한국어로 친절하고 정확하게 설명한다. 핵심 개념과 풀이 과정을 단계적으로 설명하고, 모르는 내용은 추측하지 않는다.",
+          },
+        ],
+      },
+      contents,
+      generationConfig: {
+        maxOutputTokens: 2048,
+        thinkingConfig: { thinkingLevel: "low" },
+      },
+    });
+
+    const callModel = (model) => fetch(GEMINI_URL(model), {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
         "x-goog-api-key": apiKey,
       },
-      body: JSON.stringify({
-        systemInstruction: {
-          parts: [
-            {
-              text: "너는 Lozix의 AI 공부 도우미다. 학생의 질문을 한국어로 친절하고 정확하게 설명한다. 핵심 개념과 풀이 과정을 단계적으로 설명하고, 모르는 내용은 추측하지 않는다.",
-            },
-          ],
-        },
-        contents,
-        generationConfig: {
-          maxOutputTokens: 2048,
-          temperature: 0.4,
-          thinkingConfig: { thinkingLevel: "low" },
-        },
-      }),
+      body: requestBody,
     });
+
+    let response = await callModel(GEMINI_MODEL);
+    if (response.status === 503) {
+      console.warn(`${GEMINI_MODEL} is busy; retrying once with ${GEMINI_FALLBACK_MODEL}.`);
+      response = await callModel(GEMINI_FALLBACK_MODEL);
+    }
 
     const raw = await response.text();
     let payload = null;
