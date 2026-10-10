@@ -82,6 +82,7 @@ async function handlePost(request) {
         generationConfig: {
           maxOutputTokens: 2048,
           temperature: 0.4,
+          thinkingConfig: { thinkingLevel: "low" },
         },
       }),
     });
