@@ -2,6 +2,8 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { supabase } from "./supabase";
 
 
+type Tab = "calendar" | "timer" | "stats" | "ai" | "settings";
+
 type StudyRecord = {
   id: string;
   date: string;
@@ -378,6 +380,7 @@ function App() {
     return () => window.clearInterval(id);
   }, [running, timerStartedAt, pausedElapsed]);
 
+
   const calendarCells = useMemo(
     () => getMonthDays(viewDate.getFullYear(), viewDate.getMonth()),
     [viewDate]
@@ -442,7 +445,7 @@ function App() {
     const chat = aiChats.find(c => c.id === activeAiChatId);
     if (!chat) return;
     const nextMessages: AiMessage[] = [...chat.messages, { role: "user", content: message }];
-    setAiChats(prev => prev.map(c => c.id === chat.id ? { ...c, messages: nextMessages } : c));
+    setAiChats(prev => prev.map(c => c.id === chat.id ? { ...c, messages: nextMessages, title: c.messages.length === 0 ? message.slice(0, 24) : c.title } : c));
     setAiInput("");
     setAiError("");
     setAiLoading(true);
@@ -455,8 +458,10 @@ function App() {
       });
       const raw = await response.text();
       let data: any = {};
-      try { data = raw ? JSON.parse(raw) : {}; } catch { data = { error: raw.slice(0, 800) }; }
-      if (!response.ok) throw new Error(data?.error || `AI 호출에 실패했습니다. (${response.status})`);
+      try { data = raw ? JSON.parse(raw) : {}; } catch { data = {}; }
+      if (!response.ok) {
+        throw new Error(data?.error || `AI 서버 오류 (HTTP ${response.status})`);
+      }
       if (!data?.answer) throw new Error("AI가 답변을 반환하지 않았습니다.");
       setAiChats(prev => prev.map(c => c.id === chat.id ? { ...c, messages: [...nextMessages, { role: "assistant", content: String(data.answer) }] } : c));
     } catch (error) {
@@ -482,25 +487,6 @@ function App() {
     const title = nextTitle.trim().slice(0, 40);
     if (!title) return;
     setAiChats(prev => prev.map(c => c.id === id ? { ...c, title } : c));
-  }
-
-  function deleteAiChat(id: string) {
-    const chat = aiChats.find(c => c.id === id);
-    if (!chat) return;
-    if (!window.confirm(`"${chat.title}" 대화를 삭제할까요?`)) return;
-    const remaining = aiChats.filter(c => c.id !== id);
-    if (remaining.length === 0) {
-      const nextChat: AiChat = { id: crypto.randomUUID(), title: "새 대화", messages: [] };
-      setAiChats([nextChat]);
-      setActiveAiChatId(nextChat.id);
-    } else {
-      setAiChats(remaining);
-      if (activeAiChatId === id) {
-        setActiveAiChatId(remaining[0].id);
-        setAiInput("");
-        setAiError("");
-      }
-    }
   }
 
 
@@ -577,6 +563,7 @@ function App() {
   function removeRecord(id: string) {
     setRecords((prev) => prev.filter((record) => record.id !== id));
   }
+
 
   const currentMinutes = timerMode === "focus" ? focusMinutes : breakMinutes;
   const currentLength = currentMinutes * 60;
@@ -849,7 +836,6 @@ function App() {
                         <span>{chat.messages.length ? `${chat.messages.length}개 메시지` : "새 대화"}</span>
                       </button>
                       <button className="ai-chat-rename" onClick={() => renameAiChat(chat.id)} aria-label="대화 이름 변경">✎</button>
-                      <button className="ai-chat-delete" onClick={() => deleteAiChat(chat.id)} aria-label="대화 삭제">×</button>
                     </div>
                   ))}
                 </div>

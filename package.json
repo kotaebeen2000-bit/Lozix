@@ -15,5 +15,8 @@
     "react": "latest",
     "react-dom": "latest"
   },
-  "devDependencies": {}
+  "devDependencies": {},
+  "engines": {
+    "node": "22.x"
+  }
 }

@@ -236,6 +236,14 @@ button:not(:disabled):hover { transform:translateY(-1px); }
 .stats-title{color:#fff!important}
 .stat-cards>div{background:#11141b!important;border-color:#242936!important}
 .stat-cards span,.stat-cards strong{color:#fff!important}
+
+
+
+.pomodoro.running{animation:none!important}
+
+@media(max-width:700px){}
+
+
 /* ===== LOZIX FINAL REQUESTED FIXES ===== */
 
 /* Statistics: prevent heading/card text collision caused by typography overrides. */
@@ -495,10 +503,6 @@ button:not(:disabled):hover { transform:translateY(-1px); }
 .app-shell.light-theme .ai-chat-select span { color:#7b8495; }
 .app-shell.light-theme .ai-chat-rename { color:#667085; }
 .app-shell.light-theme .ai-chat-rename:hover { background:#e9edf5; color:#344054; }
-.ai-chat-delete { width:30px; height:30px; flex:0 0 30px; border:0; border-radius:8px; background:transparent; color:#9a6670; }
-.ai-chat-delete:hover { background:#3a2027; color:#fff; }
-.app-shell.light-theme .ai-chat-delete { color:#a35d68; }
-.app-shell.light-theme .ai-chat-delete:hover { background:#fbecee; color:#8f2f3d; }
 .app-shell.light-theme .ai-card { background:#fff; border-color:#e1e4eb; box-shadow:0 8px 28px rgba(32,42,64,.05); }
 .app-shell.light-theme .ai-empty { color:#687184; }
 .app-shell.light-theme .ai-empty strong { color:#1d2433; }
@@ -518,24 +522,13 @@ button:not(:disabled):hover { transform:translateY(-1px); }
 .app-shell.light-theme .progress-track { background:#e5e8ef; }
 .app-shell.light-theme .bar-item span { color:#667085; }
 .app-shell.light-theme .bar-item small { color:#8a93a4; }
+.app-shell.light-theme .track-row { color:#263044; }
+.app-shell.light-theme .track-details strong { color:#263044; }
+.app-shell.light-theme .track-details small { color:#7b8495; }
+.app-shell.light-theme .track-row:not(.active) .track-play { color:#667085; }
 
 @media (max-width:700px) {
   .ai-layout { grid-template-columns:1fr; }
   .ai-sidebar { min-height:0; }
   .ai-chat-list { max-height:190px; overflow-y:auto; }
-}
-
-/* Final light-mode input visibility fixes */
-.app-shell.light-theme input,
-.app-shell.light-theme textarea,
-.app-shell.light-theme select {
-  color: #1d2433 !important;
-  -webkit-text-fill-color: #1d2433 !important;
-  background: #fff !important;
-  border-color: #dfe3eb !important;
-}
-.app-shell.light-theme input::placeholder,
-.app-shell.light-theme textarea::placeholder {
-  color: #8a93a4 !important;
-  -webkit-text-fill-color: #8a93a4 !important;
 }
