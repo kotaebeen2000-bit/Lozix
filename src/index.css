@@ -532,3 +532,23 @@ button:not(:disabled):hover { transform:translateY(-1px); }
   .ai-sidebar { min-height:0; }
   .ai-chat-list { max-height:190px; overflow-y:auto; }
 }
+
+/* Light mode contrast: override legacy dark-only !important colors. */
+.app-shell.light-theme input,
+.app-shell.light-theme textarea,
+.app-shell.light-theme select {
+  color:#1d2433 !important;
+  -webkit-text-fill-color:#1d2433 !important;
+}
+.app-shell.light-theme input::placeholder,
+.app-shell.light-theme textarea::placeholder {
+  color:#7b8495 !important;
+  -webkit-text-fill-color:#7b8495 !important;
+}
+.app-shell.light-theme .stats-title { color:#1d2433 !important; }
+.app-shell.light-theme .stat-cards > div {
+  background:#fff !important;
+  border-color:#e7e9ef !important;
+}
+.app-shell.light-theme .stat-cards span { color:#667085 !important; }
+.app-shell.light-theme .stat-cards strong { color:#1d2433 !important; }
