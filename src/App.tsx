@@ -479,6 +479,23 @@ function App() {
     setAiError("");
   }
 
+  function deleteAiChat(id: string) {
+    const chat = aiChats.find(c => c.id === id);
+    if (!chat || !window.confirm(`\"${chat.title}\" 대화를 삭제할까요? 삭제한 대화는 복구할 수 없습니다.`)) return;
+
+    const remaining = aiChats.filter(c => c.id !== id);
+    if (remaining.length === 0) {
+      const freshChat: AiChat = { id: crypto.randomUUID(), title: "새 대화", messages: [] };
+      setAiChats([freshChat]);
+      setActiveAiChatId(freshChat.id);
+    } else {
+      setAiChats(remaining);
+      if (activeAiChatId === id) setActiveAiChatId(remaining[0].id);
+    }
+    setAiInput("");
+    setAiError("");
+  }
+
   function renameAiChat(id: string) {
     const chat = aiChats.find(c => c.id === id);
     if (!chat) return;
@@ -836,6 +853,7 @@ function App() {
                         <span>{chat.messages.length ? `${chat.messages.length}개 메시지` : "새 대화"}</span>
                       </button>
                       <button className="ai-chat-rename" onClick={() => renameAiChat(chat.id)} aria-label="대화 이름 변경">✎</button>
+                      <button className="ai-chat-delete" onClick={() => deleteAiChat(chat.id)} aria-label={`${chat.title} 대화 삭제`} title="대화 삭제">×</button>
                     </div>
                   ))}
                 </div>

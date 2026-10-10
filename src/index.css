@@ -492,6 +492,8 @@ button:not(:disabled):hover { transform:translateY(-1px); }
 .ai-chat-select span { color:#80899a; font-size:10px; }
 .ai-chat-rename { width:30px; height:30px; flex:0 0 30px; border:0; border-radius:8px; background:transparent; color:#8e98aa; }
 .ai-chat-rename:hover { background:#2a3140; color:#fff; }
+.ai-chat-delete { width:30px; height:30px; flex:0 0 30px; border:0; border-radius:8px; background:transparent; color:#a47d86; font-size:20px; line-height:1; }
+.ai-chat-delete:hover { background:#3a252a; color:#ff9d9d; }
 .ai-page .ai-card { min-width:0; }
 
 /* Light mode: explicitly override AI and common controls so every surface stays readable. */
@@ -503,6 +505,8 @@ button:not(:disabled):hover { transform:translateY(-1px); }
 .app-shell.light-theme .ai-chat-select span { color:#7b8495; }
 .app-shell.light-theme .ai-chat-rename { color:#667085; }
 .app-shell.light-theme .ai-chat-rename:hover { background:#e9edf5; color:#344054; }
+.app-shell.light-theme .ai-chat-delete { color:#8b5560; }
+.app-shell.light-theme .ai-chat-delete:hover { background:#feecee; color:#b42332; }
 .app-shell.light-theme .ai-card { background:#fff; border-color:#e1e4eb; box-shadow:0 8px 28px rgba(32,42,64,.05); }
 .app-shell.light-theme .ai-empty { color:#687184; }
 .app-shell.light-theme .ai-empty strong { color:#1d2433; }
