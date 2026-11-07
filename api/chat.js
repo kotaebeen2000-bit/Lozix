@@ -1,9 +1,10 @@
 
+
 const GEMINI_MODEL = "gemini-3.5-flash-lite";
 const GEMINI_FALLBACK_MODEL = "gemini-3.8-flash";
 
-const GEMINI_URL = (model) =>
-  `https://generativelanguage.googleapis.com/v1beta/models/${model}:streamGenerateContent?alt=sse`;
+const GEMINI_BASE_URL =
+  "https://generativelanguage.googleapis.com/v1beta/models";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -18,8 +19,98 @@ function json(body, status = 200) {
   });
 }
 
+function extractText(payload) {
+  const parts = payload?.candidates?.[0]?.content?.parts;
+
+  if (!Array.isArray(parts)) return "";
+
+  return parts
+    .filter((part) => typeof part?.text === "string")
+    .map((part) => part.text)
+    .join("");
+}
+
+function createRequestBody(contents) {
+  return {
+    systemInstruction: {
+      parts: [
+        {
+          text: [
+            "너는 Lozix의 AI 공부 도우미다.",
+            "학생의 질문에 한국어로 친절하고 정확하게 답변한다.",
+            "어려운 개념은 쉬운 말로 풀어서 설명한다.",
+            "필요하면 단계별 풀이와 구체적인 예시를 제공한다.",
+            "답변은 제목, 설명, 예시, 핵심 요약을 적절히 구분한다.",
+            "모르는 내용은 추측하지 말고 불확실하다고 밝힌다.",
+          ].join("\n"),
+        },
+      ],
+    },
+    contents,
+    generationConfig: {
+      maxOutputTokens: 2048,
+      thinkingConfig: {
+        thinkingLevel: "low",
+      },
+    },
+  };
+}
+
+function makeContents(messages) {
+  return messages
+    .filter(
+      (message) =>
+        message &&
+        (message.role === "user" ||
+          message.role === "assistant") &&
+        typeof message.content === "string" &&
+        message.content.trim(),
+    )
+    .slice(-20)
+    .map((message) => ({
+      role: message.role === "assistant" ? "model" : "user",
+      parts: [
+        {
+          text: message.content.trim().slice(0, 6000),
+        },
+      ],
+    }));
+}
+
+async function callGemini(model, apiKey, requestBody, stream) {
+  const method = stream
+    ? "streamGenerateContent?alt=sse"
+    : "generateContent";
+
+  return fetch(`${GEMINI_BASE_URL}/${model}:${method}`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "x-goog-api-key": apiKey,
+    },
+    body: JSON.stringify(requestBody),
+  });
+}
+
+async function getErrorMessage(response) {
+  const raw = await response.text();
+
+  try {
+    const payload = raw ? JSON.parse(raw) : null;
+    return (
+      payload?.error?.message ||
+      raw.slice(0, 800) ||
+      "Gemini 응답이 없습니다."
+    );
+  } catch {
+    return raw.slice(0, 800) || "Gemini 응답이 없습니다.";
+  }
+}
+
 async function handlePost(request) {
-  const apiKey = String(process.env.GEMINI_API_KEY || "").trim();
+  const apiKey = String(
+    process.env.GEMINI_API_KEY || "",
+  ).trim();
 
   if (!apiKey) {
     return json({
@@ -32,116 +123,107 @@ async function handlePost(request) {
   try {
     body = await request.json();
   } catch {
-    return json({ error: "요청 본문을 읽을 수 없습니다." }, 400);
+    return json({
+      error: "요청 본문을 읽을 수 없습니다.",
+    }, 400);
   }
 
-  const incoming = Array.isArray(body?.messages)
-    ? body.messages
-    : [];
-
-  const contents = incoming
-    .filter(
-      (message) =>
-        message &&
-        (message.role === "user" ||
-          message.role === "assistant") &&
-        typeof message.content === "string" &&
-        message.content.trim(),
-    )
-    .slice(-20)
-    .map((message) => ({
-      role: message.role === "assistant" ? "model" : "user",
-      parts: [{ text: message.content.trim().slice(0, 6000) }],
-    }));
+  const contents = makeContents(
+    Array.isArray(body?.messages) ? body.messages : [],
+  );
 
   if (!contents.length) {
-    return json({ error: "질문을 입력하세요." }, 400);
+    return json({
+      error: "질문을 입력하세요.",
+    }, 400);
   }
 
+  // 기본값은 기존 프론트엔드와 호환되는 JSON 방식
+  // 프론트엔드가 stream: true를 보내면 SSE 방식 사용
+  const stream = body?.stream === true;
+
   try {
-    const requestBody = JSON.stringify({
-      systemInstruction: {
-        parts: [{
-          text: "너는 Lozix의 AI 공부 도우미다. 학생의 질문을 한국어로 친절하고 정확하게 설명한다. 핵심 개념과 풀이 과정을 단계적으로 설명하고, 모르는 내용은 추측하지 않는다.",
-        }],
-      },
-      contents,
-      generationConfig: {
-        maxOutputTokens: 2048,
-        thinkingConfig: {
-          thinkingLevel: "low",
-        },
-      },
-    });
+    const requestBody = createRequestBody(contents);
 
-    const callModel = (model) =>
-      fetch(GEMINI_URL(model), {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "x-goog-api-key": apiKey,
-        },
-        body: requestBody,
-      });
-
-    let response = await callModel(GEMINI_MODEL);
+    let response = await callGemini(
+      GEMINI_MODEL,
+      apiKey,
+      requestBody,
+      stream,
+    );
 
     if (response.status === 503) {
       console.warn(
-        `${GEMINI_MODEL} is busy; retrying with ${GEMINI_FALLBACK_MODEL}.`,
+        `${GEMINI_MODEL} is busy. Retrying with ${GEMINI_FALLBACK_MODEL}.`,
       );
 
-      response = await callModel(GEMINI_FALLBACK_MODEL);
+      response = await callGemini(
+        GEMINI_FALLBACK_MODEL,
+        apiKey,
+        requestBody,
+        stream,
+      );
     }
 
     if (!response.ok) {
-      const raw = await response.text();
+      const message = await getErrorMessage(response);
 
-      let payload = null;
-
-      try {
-        payload = raw ? JSON.parse(raw) : null;
-      } catch {
-        // Non-JSON error response
-      }
-
-      const message =
-        payload?.error?.message ||
-        raw.slice(0, 800) ||
-        "Gemini 응답이 없습니다.";
-
-      console.error("Gemini API error:", response.status, message);
-
-      return json(
-        {
-          error: `Gemini API 오류 (${response.status}): ${message}`,
-        },
+      console.error(
+        "Gemini API error:",
         response.status,
+        message,
       );
+
+      return json({
+        error: `Gemini API 오류 (${response.status}): ${message}`,
+      }, response.status);
     }
 
-    if (!response.body) {
+    // 스트리밍 모드
+    if (stream) {
+      if (!response.body) {
+        return json({
+          error: "Gemini 스트리밍 응답이 없습니다.",
+        }, 502);
+      }
+
+      return new Response(response.body, {
+        status: 200,
+        headers: {
+          ...corsHeaders,
+          "Content-Type": "text/event-stream; charset=utf-8",
+          "Cache-Control": "no-cache, no-transform",
+          "X-Accel-Buffering": "no",
+        },
+      });
+    }
+
+    // 기존 JSON 모드
+    const payload = await response.json();
+    const answer = extractText(payload);
+
+    if (!answer) {
+      console.error(
+        "Gemini returned no readable text:",
+        JSON.stringify(payload).slice(0, 1000),
+      );
+
       return json({
-        error: "Gemini 스트리밍 응답을 받을 수 없습니다.",
+        error: "Gemini에서 읽을 수 있는 답변을 받지 못했습니다.",
       }, 502);
     }
 
-    // Gemini SSE 스트림을 브라우저로 전달
-    return new Response(response.body, {
-      status: 200,
-      headers: {
-        ...corsHeaders,
-        "Content-Type": "text/event-stream; charset=utf-8",
-        "Cache-Control": "no-cache, no-transform",
-        "X-Accel-Buffering": "no",
-      },
+    return json({
+      answer,
     });
 
   } catch (error) {
-    const detail =
-      error instanceof Error ? error.message : String(error);
+    console.error("Lozix AI server error:", error);
 
-    console.error("Lozix /api/chat error:", error);
+    const detail =
+      error instanceof Error
+        ? error.message
+        : String(error);
 
     return json({
       error: `AI 서버 오류: ${detail}`,
@@ -163,7 +245,13 @@ export default {
         ok: true,
         service: "lozix-ai",
         route: "/api/chat",
-        message: "Lozix streaming AI API route is deployed.",
+        version: "2.0",
+        features: [
+          "json",
+          "streaming",
+          "conversation-history",
+          "fallback-model",
+        ],
       });
     }
 
@@ -176,3 +264,4 @@ export default {
     }, 405);
   },
 };
+
