@@ -438,14 +438,27 @@ function App() {
     await loadProfile(profile, profilePin);
   }
 
+ 
   async function askAi() {
     const message = aiInput.trim();
     if (!message || aiLoading) return;
 
     const chat = aiChats.find(c => c.id === activeAiChatId);
     if (!chat) return;
-    const nextMessages: AiMessage[] = [...chat.messages, { role: "user", content: message }];
-    setAiChats(prev => prev.map(c => c.id === chat.id ? { ...c, messages: nextMessages, title: c.messages.length === 0 ? message.slice(0, 24) : c.title } : c));
+
+    const nextMessages: AiMessage[] = [
+      ...chat.messages,
+      { role: "user", content: message },
+    ];
+
+    const updateMessages = (messages: AiMessage[]) => {
+      setAiChats(prev =>
+        prev.map(c =>
+          c.id === chat.id ? { ...c, messages } : c
+        )
+      );
+    };
+
     setAiInput("");
     setAiError("");
     setAiLoading(true);
@@ -454,22 +467,107 @@ function App() {
       const response = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ messages: nextMessages }),
+        body: JSON.stringify({
+          messages: nextMessages,
+          stream: true,
+        }),
       });
-      const raw = await response.text();
-      let data: any = {};
-      try { data = raw ? JSON.parse(raw) : {}; } catch { data = {}; }
+
       if (!response.ok) {
-        throw new Error(data?.error || `AI 서버 오류 (HTTP ${response.status})`);
+        const raw = await response.text();
+        let data: any = {};
+
+        try {
+          data = raw ? JSON.parse(raw) : {};
+        } catch {}
+
+        throw new Error(
+          data?.error || `AI 서버 오류 (HTTP ${response.status})`
+        );
       }
-      if (!data?.answer) throw new Error("AI가 답변을 반환하지 않았습니다.");
-      setAiChats(prev => prev.map(c => c.id === chat.id ? { ...c, messages: [...nextMessages, { role: "assistant", content: String(data.answer) }] } : c));
+
+      if (!response.body) {
+        throw new Error("AI 스트리밍 응답을 받을 수 없습니다.");
+      }
+
+      let answer = "";
+
+      updateMessages([
+        ...nextMessages,
+        { role: "assistant", content: "" },
+      ]);
+
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = "";
+
+      const processEvent = (event: string) => {
+        for (const line of event.split(/\r?\n/)) {
+          if (!line.startsWith("data:")) continue;
+
+          const data = line.slice(5).trim();
+          if (!data || data === "[DONE]") continue;
+
+          try {
+            const payload = JSON.parse(data);
+            const parts = payload?.candidates?.[0]?.content?.parts;
+
+            if (!Array.isArray(parts)) continue;
+
+            const chunk = parts
+              .filter((part: any) => typeof part?.text === "string")
+              .map((part: any) => part.text)
+              .join("");
+
+            if (chunk) {
+              answer += chunk;
+
+              updateMessages([
+                ...nextMessages,
+                { role: "assistant", content: answer },
+              ]);
+            }
+          } catch {
+            console.warn("AI 스트리밍 데이터 처리 오류");
+          }
+        }
+      };
+
+      while (true) {
+        const { value, done } = await reader.read();
+        if (done) break;
+
+        buffer += decoder.decode(value, { stream: true });
+
+        const events = buffer.split(/\r?\n\r?\n/);
+        buffer = events.pop() || "";
+
+        for (const event of events) {
+          processEvent(event);
+        }
+      }
+
+      buffer += decoder.decode();
+
+      if (buffer.trim()) {
+        processEvent(buffer);
+      }
+
+      if (!answer.trim()) {
+        throw new Error("AI가 읽을 수 있는 답변을 반환하지 않았습니다.");
+      }
+
     } catch (error) {
-      setAiError(error instanceof Error ? error.message : "AI 호출에 실패했습니다.");
+      setAiError(
+        error instanceof Error
+          ? error.message
+          : "AI 호출에 실패했습니다."
+      );
     } finally {
       setAiLoading(false);
     }
   }
+
 
   function createAiChat() {
     const chat: AiChat = { id: crypto.randomUUID(), title: "새 대화", messages: [] };
