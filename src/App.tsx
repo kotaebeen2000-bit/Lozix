@@ -727,6 +727,10 @@ async function changeManagedRole(profile: AdminProfile, action: "grant_admin" | 
 
   function logOutProfile() {
     setActiveProfile(null);
+    setAdminRole("user");
+setAdminProfiles([]);
+setAdminMessage("");
+setAdminInviteCode("");
     setProfileLoaded(false);
     setRecords([]);
     setGoals([]);
