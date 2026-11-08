@@ -447,6 +447,94 @@ const [adminLoading, setAdminLoading] = useState(false);
   }
 
  
+ async function callAdminApi(action: string, extra: Record<string, unknown> = {}) {
+  if (!activeProfile) throw new Error("먼저 프로필에 로그인하세요.");
+
+  const response = await fetch("/api/admin", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      action,
+      profile_id: activeProfile.id,
+      profile_name: activeProfile.name,
+      profile_pin: activeProfile.pin,
+      ...extra,
+    }),
+  });
+
+  const payload = await response.json().catch(() => ({}));
+  if (!response.ok) {
+    throw new Error(payload.error || `관리자 요청 실패 (HTTP ${response.status})`);
+  }
+  return payload;
+}
+
+async function refreshAdminStatus() {
+  if (!activeProfile) return;
+  try {
+    const result = await callAdminApi("status");
+    setAdminRole(result.role as AdminRole);
+    if (result.role === "owner" || result.role === "admin") {
+      const list = await callAdminApi("list");
+      setAdminProfiles(list.profiles || []);
+    } else {
+      setAdminProfiles([]);
+    }
+  } catch (error) {
+    setAdminRole("user");
+    setAdminProfiles([]);
+    setAdminMessage(error instanceof Error ? error.message : "관리자 정보를 불러오지 못했습니다.");
+  }
+}
+
+async function claimAdmin() {
+  if (!adminInviteCode.trim() || adminLoading) return;
+  setAdminLoading(true);
+  setAdminMessage("");
+  try {
+    const result = await callAdminApi("claim_admin", { invite_code: adminInviteCode.trim() });
+    setAdminRole(result.role as AdminRole);
+    setAdminInviteCode("");
+    setAdminMessage(result.message || "관리자 권한이 적용되었습니다.");
+    await refreshAdminStatus();
+  } catch (error) {
+    setAdminMessage(error instanceof Error ? error.message : "관리자 등록에 실패했습니다.");
+  } finally {
+    setAdminLoading(false);
+  }
+}
+
+async function deleteManagedProfile(profile: AdminProfile) {
+  if (!window.confirm(`${profile.name} 프로필과 해당 프로필의 학습 기록을 삭제할까요? 복구할 수 없습니다.`)) return;
+  setAdminLoading(true);
+  setAdminMessage("");
+  try {
+    const result = await callAdminApi("delete_profile", { target_profile_id: profile.id });
+    setAdminMessage(result.message || "프로필을 삭제했습니다.");
+    await refreshProfiles();
+    await refreshAdminStatus();
+  } catch (error) {
+    setAdminMessage(error instanceof Error ? error.message : "프로필 삭제에 실패했습니다.");
+  } finally {
+    setAdminLoading(false);
+  }
+}
+
+async function changeManagedRole(profile: AdminProfile, action: "grant_admin" | "revoke_admin") {
+  const description = action === "grant_admin" ? "관리자로 지정" : "관리자 권한 해제";
+  if (!window.confirm(`${profile.name}님의 권한을 ${description}할까요?`)) return;
+  setAdminLoading(true);
+  setAdminMessage("");
+  try {
+    const result = await callAdminApi(action, { target_profile_id: profile.id });
+    setAdminMessage(result.message || "권한을 변경했습니다.");
+    await refreshAdminStatus();
+  } catch (error) {
+    setAdminMessage(error instanceof Error ? error.message : "권한 변경에 실패했습니다.");
+  } finally {
+    setAdminLoading(false);
+  }
+} 
   async function askAi() {
     const message = aiInput.trim();
     if (!message || aiLoading) return;
