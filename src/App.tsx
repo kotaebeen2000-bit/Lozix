@@ -302,7 +302,11 @@ function App() {
   const [aiInput, setAiInput] = useState("");
   const [aiLoading, setAiLoading] = useState(false);
   const [aiError, setAiError] = useState("");
-
+const [adminRole, setAdminRole] = useState<AdminRole>("user");
+const [adminProfiles, setAdminProfiles] = useState<AdminProfile[]>([]);
+const [adminInviteCode, setAdminInviteCode] = useState("");
+const [adminMessage, setAdminMessage] = useState("");
+const [adminLoading, setAdminLoading] = useState(false);
   useEffect(() => {
     const id = window.setInterval(() => setNow(new Date()), 1000);
     return () => window.clearInterval(id);
