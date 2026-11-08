@@ -1133,7 +1133,70 @@ setAdminInviteCode("");
               </div>
               {pinMessage && <p className="settings-message" role="status">{pinMessage}</p>}
             </div>
+<div className="settings-card">
+  <div className="settings-heading">
+    <div>
+      <p className="eyebrow">ADMINISTRATION</p>
+      <h2>관리자 관리</h2>
+    </div>
+    <span>
+      {adminRole === "owner" ? "최고 관리자" : adminRole === "admin" ? "일반 관리자" : "일반 사용자"}
+    </span>
+  </div>
 
+  {adminRole === "user" && (
+    <div className="pin-form">
+      <p>관리자 초대 코드가 있다면 입력해 관리자 권한을 등록할 수 있습니다.</p>
+      <label>
+        초대 코드
+        <input
+          type="password"
+          value={adminInviteCode}
+          onChange={e => setAdminInviteCode(e.target.value)}
+          placeholder="관리자 초대 코드"
+        />
+      </label>
+      <button className="primary" onClick={claimAdmin} disabled={adminLoading || !adminInviteCode.trim()}>
+        {adminLoading ? "확인 중…" : "관리자 코드 등록"}
+      </button>
+    </div>
+  )}
+
+  {(adminRole === "owner" || adminRole === "admin") && (
+    <>
+      <p className="settings-message">
+        {adminRole === "owner"
+          ? "최고 관리자는 관리자 지정·해제 및 일반 프로필 삭제를 할 수 있습니다."
+          : "일반 관리자는 일반 사용자 프로필만 삭제할 수 있습니다."}
+      </p>
+      <div className="admin-profile-list">
+        {adminProfiles.map(profile => (
+          <div className="settings-row" key={profile.id}>
+            <div>
+              <strong>{profile.name}</strong>
+              <small>
+                {profile.role === "owner" ? "최고 관리자" : profile.role === "admin" ? "일반 관리자" : "일반 사용자"}
+              </small>
+            </div>
+            <div className="admin-profile-actions">
+              {adminRole === "owner" && profile.role !== "owner" && (
+                profile.role === "admin"
+                  ? <button className="secondary" disabled={adminLoading} onClick={() => void changeManagedRole(profile, "revoke_admin")}>관리자 해제</button>
+                  : <button className="secondary" disabled={adminLoading} onClick={() => void changeManagedRole(profile, "grant_admin")}>관리자 지정</button>
+              )}
+              {profile.role === "user" && profile.id !== activeProfile.id && (
+                <button className="text-button" disabled={adminLoading} onClick={() => void deleteManagedProfile(profile)}>프로필 삭제</button>
+              )}
+            </div>
+          </div>
+        ))}
+      </div>
+      <button className="secondary" disabled={adminLoading} onClick={() => void refreshAdminStatus()}>목록 새로고침</button>
+    </>
+  )}
+
+  {adminMessage && <p className="settings-message" role="status">{adminMessage}</p>}
+</div>
             <div className="settings-card">
               <div className="settings-heading"><div><p className="eyebrow">STUDY</p><h2>공부 설정</h2></div></div>
               <div className="settings-row">
