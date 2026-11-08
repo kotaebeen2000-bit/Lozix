@@ -17,7 +17,11 @@ type Profile = { id: string; name: string };
 type ActiveProfile = Profile & { pin: string };
 type AiMessage = { role: "user" | "assistant"; content: string };
 type AiChat = { id: string; title: string; messages: AiMessage[] };
-
+type AdminRole = "owner" | "admin" | "user";
+type AdminProfile = Profile & {
+  role: AdminRole;
+  created_at?: string;
+};
 function readStudyGoal(key: string) {
   const n = Number(localStorage.getItem(key) || 0);
   return Number.isFinite(n) && n >= 0 ? n : 0;
