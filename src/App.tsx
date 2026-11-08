@@ -315,7 +315,15 @@ const [adminLoading, setAdminLoading] = useState(false);
   useEffect(() => {
     refreshProfiles();
   }, []);
-
+useEffect(() => {
+  if (!activeProfile) {
+    setAdminRole("user");
+    setAdminProfiles([]);
+    setAdminMessage("");
+    return;
+  }
+  void refreshAdminStatus();
+}, [activeProfile?.id]);
   useEffect(() => {
     localStorage.setItem("lozix-theme", theme);
   }, [theme]);
